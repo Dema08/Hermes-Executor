@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET9_0;NETCOREAPP
 C:\laragon\www\Hermes-Executor\App.xaml
-3990995955
+6-2070889408
 
-4954827233
+7-2006605117
 215-912618575
-MainWindow.xaml;Styles\DarkTheme.xaml;Styles\HermesTheme.xaml;
+Controls\StatusIndicator.xaml;MainWindow.xaml;Styles\DarkTheme.xaml;Styles\HermesTheme.xaml;Views\ConsoleView.xaml;Views\ScriptEditor.xaml;
 
 False
 

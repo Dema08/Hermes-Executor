@@ -160,3 +160,9 @@ C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Hermes-Executor.pdb
 C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Hermes-Executor.genruntimeconfig.cache
 C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\ref\Hermes-Executor.dll
 C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Hermes-Executor.sourcelink.json
+C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Controls\StatusIndicator.baml
+C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Views\ConsoleView.baml
+C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Views\ScriptEditor.baml
+C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Controls\StatusIndicator.g.cs
+C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Views\ConsoleView.g.cs
+C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Views\ScriptEditor.g.cs

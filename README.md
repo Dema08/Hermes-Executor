@@ -10,5 +10,7 @@ Roblox Executor dengan Desain Premium Dark Theme & Aksen Emas (Terinspirasi dari
 ## Struktur Proyek
 - `Core/Injector.cs` - Logic deteksi & inject Roblox
 - `Core/ScriptEngine.cs` - Logic eksekusi script
-- `Views/` - Komponen & Halaman Pendukung
+- `Views/ScriptEditor.xaml` - Komponen script editor
+- `Views/ConsoleView.xaml` - Komponen terminal console
+- `Controls/StatusIndicator.xaml` - Komponen indikator status animasi
 - `Styles/` - Tema Gelap & Hermes Gold Theme

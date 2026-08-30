@@ -1,0 +1,12 @@
+<UserControl x:Class="Hermes_Executor.Controls.StatusIndicator"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="120">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <Ellipse x:Name="IndicatorDot" Width="8" Height="8" Fill="{DynamicResource SuccessGreen}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+        <TextBlock x:Name="IndicatorText" Text="Ready" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+    </StackPanel>
+</UserControl>
