@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Hermes Executor - Loading" Height="420" Width="680"
+        Title="Hermes Executor - Loading" Height="500" Width="820"
         Icon="pack://application:,,,/Controls/Resource/hermes_icon.ico"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="CenterScreen" ShowInTaskbar="True">
