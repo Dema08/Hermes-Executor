@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using Hermes_Executor.Core;
 
 namespace Hermes_Executor.Views
 {
@@ -76,7 +77,30 @@ namespace Hermes_Executor.Views
     public partial class ScriptEditor : UserControl
     {
         public ObservableCollection<ScriptTabItem> TabsList { get; } = new();
-        public ScriptTabItem? ActiveTab => Tabs.SelectedItem as ScriptTabItem;
+
+        public static readonly DependencyProperty ActiveTabProperty =
+            DependencyProperty.Register(
+                nameof(ActiveTab),
+                typeof(ScriptTabItem),
+                typeof(ScriptEditor),
+                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnActiveTabChanged));
+
+        public ScriptTabItem? ActiveTab
+        {
+            get => (ScriptTabItem?)GetValue(ActiveTabProperty);
+            set => SetValue(ActiveTabProperty, value);
+        }
+
+        private static void OnActiveTabChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ScriptEditor editor && e.NewValue is ScriptTabItem tabItem)
+            {
+                if (editor.Tabs.SelectedItem != tabItem)
+                {
+                    editor.Tabs.SelectedItem = tabItem;
+                }
+            }
+        }
         
         public event Action<string>? ScriptSaved;
         private readonly System.Windows.Threading.DispatcherTimer _sessionSaveTimer;
@@ -114,10 +138,21 @@ namespace Hermes_Executor.Views
                 LineNumbersForeground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#6E7681")!,
                 FontFamily = new System.Windows.Media.FontFamily("Consolas"),
                 FontSize = 13,
-                ShowLineNumbers = true
+                ShowLineNumbers = true,
+                WordWrap = false
             };
             
             editor.Text = content;
+            
+            // Install Search Panel
+            try
+            {
+                ICSharpCode.AvalonEdit.Search.SearchPanel.Install(editor);
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SearchPanel Error: {ex.Message}");
+            }
             
             // Load highlighting
             try
@@ -312,6 +347,10 @@ namespace Hermes_Executor.Views
 
         private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (ActiveTab != Tabs.SelectedItem)
+            {
+                ActiveTab = Tabs.SelectedItem as ScriptTabItem;
+            }
             // Update status text with caret of currently selected editor
             if (ActiveTab != null)
             {

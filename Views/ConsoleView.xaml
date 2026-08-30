@@ -18,10 +18,10 @@
                 <Button x:Name="BtnClearConsole" Content="🗑️" Width="26" Height="26" HorizontalAlignment="Right" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0"/>
             </Grid>
 
-            <TextBox Grid.Row="1" x:Name="TxtConsoleOutput" Background="#0A0A0A" Foreground="{DynamicResource SuccessGreen}" FontFamily="Consolas" FontSize="12" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" BorderThickness="0" Margin="10,0"/>
+            <TextBox Grid.Row="1" x:Name="TxtConsoleOutput" Background="{DynamicResource ConsoleBackground}" Foreground="{DynamicResource SuccessGreen}" FontFamily="Consolas" FontSize="12" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" BorderThickness="0" Margin="10,0"/>
 
             <Grid Grid.Row="2" Margin="10">
-                <TextBox x:Name="TxtConsoleInput" Background="{DynamicResource ControlBackground}" Foreground="{DynamicResource TextPrimary}" FontFamily="Consolas" FontSize="12" Padding="5" BorderBrush="{DynamicResource BorderBrush}"/>
+                <TextBox x:Name="TxtConsoleInput" Background="{DynamicResource InputBackground}" Foreground="{DynamicResource TextPrimary}" FontFamily="Consolas" FontSize="12" Padding="5" BorderBrush="{DynamicResource BorderBrush}"/>
             </Grid>
         </Grid>
     </Border>

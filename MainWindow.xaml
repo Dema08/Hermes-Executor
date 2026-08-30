@@ -5,14 +5,94 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:Hermes_Executor.Views"
         xmlns:controls="clr-namespace:Hermes_Executor.Controls"
-        xmlns:avalondit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
-        Title="Hermes Executor v1.0" Height="768" Width="1024"
+        Title="Hermes Executor v1.0" Height="768" Width="1100"
         Icon="pack://application:,,,/Controls/Resource/hermes_icon.ico"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip"
-        MinHeight="600" MinWidth="800" MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        MinHeight="600" MinWidth="900" MouseLeftButtonDown="Window_MouseLeftButtonDown"
         PreviewKeyDown="Window_PreviewKeyDown">
+
+    <Window.Resources>
+        <!-- Activity Bar Button Style -->
+        <Style x:Key="ActivityButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="Bg" Background="{TemplateBinding Background}"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#252528"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Sidebar Buttons Style -->
+        <Style x:Key="SidebarOperationButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2C2C32"/>
+                                <Setter Property="Foreground" Value="{DynamicResource HermesGold}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- TabItem Style for Bottom Panel -->
+        <Style x:Key="BottomTabItemStyle" TargetType="TabItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" BorderBrush="{DynamicResource HermesGold}" BorderThickness="0" Margin="0,0,2,0">
+                            <ContentPresenter ContentSource="Header" Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="0,0,0,2"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 
     <Border Background="{DynamicResource BackgroundDark}" BorderBrush="{DynamicResource HermesGold}" BorderThickness="1" CornerRadius="4">
         <Grid>
@@ -22,7 +102,7 @@
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
 
-            <!-- TITLE BAR -->
+            <!-- TOP / TITLE BAR -->
             <Grid Grid.Row="0" Background="{DynamicResource BackgroundLight}" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -32,50 +112,12 @@
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
                     <Image Source="pack://application:,,,/Controls/Resource/hermes_icon.ico" Width="18" Height="18" Margin="0,0,8,0"/>
-                    <TextBlock Text="HERMES EXECUTOR" Foreground="{DynamicResource TextPrimary}" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text="HERMES EXECUTOR" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button x:Name="BtnMinimize" Content="─" Width="45" Height="35" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Click="Minimize_Click">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource BackgroundMedium}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
-                    <Button x:Name="BtnMaximize" Content="☐" Width="45" Height="35" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Click="Maximize_Click">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource BackgroundMedium}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
+                    <Button x:Name="BtnMinimize" Content="─" Width="45" Height="35" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Click="Minimize_Click"/>
+                    <Button x:Name="BtnMaximize" Content="☐" Width="45" Height="35" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Click="Maximize_Click"/>
                     <Button x:Name="BtnClose" Content="✕" Width="45" Height="35" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Click="Close_Click">
                         <Button.Style>
                             <Style TargetType="Button">
@@ -100,55 +142,157 @@
                 </StackPanel>
             </Grid>
 
-            <!-- MAIN CONTENT AREA (3 COLUMNS) -->
+            <!-- WORKSPACE LAYOUT (6 COLUMNS) -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="240"/>
+                    <!-- Column 0: Activity Bar -->
+                    <ColumnDefinition Width="48" x:Name="ColActivityBar"/>
+                    <!-- Column 1: Primary Sidebar -->
+                    <ColumnDefinition Width="Auto" MinWidth="260" MaxWidth="420" x:Name="ColSidebar"/>
+                    <!-- Column 2: Sidebar Splitter -->
+                    <ColumnDefinition Width="Auto" x:Name="ColSidebarSplitter"/>
+                    <!-- Column 3: Center Content Container -->
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="300"/>
+                    <!-- Column 4: Console Splitter -->
+                    <ColumnDefinition Width="Auto" x:Name="ColConsoleSplitter"/>
+                    <!-- Column 5: Right Console Panel -->
+                    <ColumnDefinition Width="300" MinWidth="200" MaxWidth="500" x:Name="ColConsole"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- SIDEBAR -->
-                <Border Grid.Column="0" Background="{DynamicResource BackgroundLight}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
-                    <Grid>
+                <!-- COLUMN 0: ACTIVITY BAR -->
+                <Grid Grid.Column="0" Background="{DynamicResource BackgroundLight}" x:Name="ActivityBarGrid">
+                    <DockPanel>
+                        <!-- Top actions -->
+                        <StackPanel DockPanel.Dock="Top" VerticalAlignment="Top">
+                            <Button x:Name="ActBtnExplorer" Style="{StaticResource ActivityButtonStyle}" Content="📄" ToolTip="Explorer / Script Workspace" Tag="Explorer" Click="ActivityButton_Click"/>
+                            <Button x:Name="ActBtnExecutor" Style="{StaticResource ActivityButtonStyle}" Content="⚡" ToolTip="Executor &amp; Injection Controls" Tag="Executor" Click="ActivityButton_Click"/>
+                            <Button x:Name="ActBtnScriptHub" Style="{StaticResource ActivityButtonStyle}" Content="📜" ToolTip="Script" Tag="Script" Click="ActivityButton_Click"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
+
+                <!-- COLUMN 1: PRIMARY SIDEBAR -->
+                <Border Grid.Column="1" Background="{DynamicResource BackgroundMedium}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0" x:Name="SidebarBorder" ClipToBounds="True">
+                    <Grid x:Name="SidebarContentGrid">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Auto-Attach Control -->
-                        <Border Grid.Row="0" Margin="10">
-                            <controls:AutoAttachControl x:Name="AutoAttachControlPanel"/>
-                        </Border>
+                        <!-- Sidebar title header -->
+                        <Grid Grid.Row="0" Margin="10,0" VerticalAlignment="Center">
+                            <TextBlock x:Name="TxtSidebarHeader" Text="EXPLORER" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
+                            <Button Content="✕" Width="20" Height="20" HorizontalAlignment="Right" Background="Transparent" Foreground="{DynamicResource TextSecondary}" BorderThickness="0" Click="CollapseSidebar_Click" VerticalAlignment="Center"/>
+                        </Grid>
 
-                        <!-- Menu Items -->
-                        <StackPanel Grid.Row="1" Margin="10,0">
-                            <Button Content="✎ Editor" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Cursor="Hand" Click="EditorButton_Click"/>
-                            <Button Content="⌕ Script Hub" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource HermesGold}" BorderThickness="0" Padding="8" Margin="0,2" Cursor="Hand" Click="ScriptHubButton_Click"/>
-                            <Separator Margin="4" Background="{DynamicResource BorderBrush}"/>
-                            <Button Content="📁 Load Script" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="LoadScript_Click"/>
-                            <Button Content="💾 Save Script" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="SaveScript_Click"/>
-                            <Button Content="📋 From Clipboard" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="ClipboardScript_Click"/>
-                            <Button Content="🗑️ Clear Script" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="ClearScript_Click"/>
-                        </StackPanel>
+                        <!-- Sidebar content switcher -->
+                        <Grid Grid.Row="1" Margin="10,5">
+                            <!-- 1. Explorer Sidebar Content -->
+                            <Grid x:Name="ExplorerSidebarContent" Visibility="Visible">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="180"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Text="OPEN SCRIPTS" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold" FontSize="10" Margin="0,5"/>
+                                <Border Grid.Row="1" Background="{DynamicResource BackgroundDark}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="5">
+                                    <ListBox x:Name="WorkspaceFileList" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                             ItemsSource="{Binding ElementName=ScriptEditorView, Path=TabsList}"
+                                             SelectedItem="{Binding ElementName=ScriptEditorView, Path=ActiveTab, Mode=TwoWay}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Header}" Foreground="{DynamicResource TextPrimary}" FontSize="12" Margin="5,2"/>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
+
+                                <TextBlock Grid.Row="2" Text="SCRIPT ACTIONS" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold" FontSize="10" Margin="0,15,0,5"/>
+                                <StackPanel Grid.Row="3">
+                                    <Button Style="{StaticResource SidebarOperationButtonStyle}" Content="📁 Load Script" Click="LoadScript_Click"/>
+                                    <Button Style="{StaticResource SidebarOperationButtonStyle}" Content="💾 Save Script" Click="SaveScript_Click"/>
+                                    <Button Style="{StaticResource SidebarOperationButtonStyle}" Content="📋 From Clipboard" Click="ClipboardScript_Click"/>
+                                    <Button Style="{StaticResource SidebarOperationButtonStyle}" Content="🗑️ Clear Script" Click="ClearScript_Click"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- 2. Executor Sidebar Content -->
+                            <Grid x:Name="ExecutorSidebarContent" Visibility="Collapsed">
+                                <StackPanel>
+                                    <TextBlock Text="EXECUTOR STATE" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold" FontSize="10" Margin="0,5,0,10"/>
+                                    <controls:AutoAttachControl x:Name="AutoAttachControlPanel"/>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Border>
 
-                <!-- CENTER CONTENT AREA -->
-                <Grid Grid.Column="1" Background="{DynamicResource BackgroundDark}">
-                    <!-- SCRIPT EDITOR VIEW -->
-                    <Grid x:Name="EditorContainer" Visibility="Visible">
-                        <views:ScriptEditor x:Name="ScriptEditorView"/>
+                <!-- COLUMN 2: SIDEBAR SPLITTER -->
+                <GridSplitter Grid.Column="2" x:Name="SidebarSplitter" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#232328" ResizeBehavior="PreviousAndNext"/>
+
+                <!-- COLUMN 3: CENTER VIEW CONTAINER (EDITOR & BOTTOM PANEL) -->
+                <Grid Grid.Column="3">
+                    <Grid.RowDefinitions>
+                        <!-- Row 0: Center Views (Editor, Script Hub, Settings) -->
+                        <RowDefinition Height="*"/>
+                        <!-- Row 1: Bottom Splitter -->
+                        <RowDefinition Height="Auto" x:Name="RowBottomSplitter"/>
+                        <!-- Row 2: Bottom Panel -->
+                        <RowDefinition Height="150" MinHeight="100" MaxHeight="300" x:Name="RowBottomPanel"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- ROW 0: CENTER VIEW SWITCHER -->
+                    <Grid Grid.Row="0">
+                        <!-- EDITOR VIEW -->
+                        <Grid x:Name="EditorContainer" Visibility="Visible">
+                            <views:ScriptEditor x:Name="ScriptEditorView"/>
+                        </Grid>
+
+                        <!-- SCRIPT HUB VIEW -->
+                        <Grid x:Name="ScriptHubContainer" Visibility="Collapsed">
+                            <views:ScriptHubView x:Name="ScriptHubViewControl"/>
+                        </Grid>
                     </Grid>
 
-                    <!-- SCRIPT HUB VIEW -->
-                    <Grid x:Name="ScriptHubContainer" Visibility="Collapsed">
-                        <views:ScriptHubView x:Name="ScriptHubViewControl"/>
-                    </Grid>
+                    <!-- ROW 1: BOTTOM PANEL SPLITTER -->
+                    <GridSplitter Grid.Row="1" x:Name="BottomSplitter" Height="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#232328" ResizeBehavior="PreviousAndNext"/>
+
+                    <!-- ROW 2: BOTTOM PANEL -->
+                    <Border Grid.Row="2" Background="{DynamicResource BackgroundLight}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" x:Name="BottomPanelBorder">
+                        <Grid>
+                            <TabControl Background="Transparent" BorderThickness="0" Margin="5,0">
+                                <TabControl.Resources>
+                                    <Style TargetType="TabItem" BasedOn="{StaticResource BottomTabItemStyle}"/>
+                                </TabControl.Resources>
+
+                                <TabItem Header="OUTPUT">
+                                    <TextBox x:Name="TxtOutputLog" Background="#0A0A0A" Foreground="{DynamicResource TextPrimary}" FontFamily="Consolas" FontSize="11" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" BorderThickness="0" Margin="5"/>
+                                </TabItem>
+                                <TabItem Header="PROBLEMS">
+                                    <TextBlock Text="No problems have been detected in the workspace." Foreground="{DynamicResource TextSecondary}" Margin="15" FontStyle="Italic" FontSize="12" HorizontalAlignment="Center"/>
+                                </TabItem>
+                                <TabItem Header="TERMINAL">
+                                    <TextBox Background="#0A0A0A" Foreground="{DynamicResource SuccessGreen}" FontFamily="Consolas" FontSize="11" IsReadOnly="True" Text="Hermes Developer Terminal v1.0.&#x0a;Use the Console panel on the right side to write and execute commands." BorderThickness="0" Margin="5"/>
+                                </TabItem>
+                            </TabControl>
+
+                            <!-- Close bottom panel button -->
+                            <Button Content="✕" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,10,0" Background="Transparent" Foreground="{DynamicResource TextSecondary}" BorderThickness="0" Click="CollapseBottomPanel_Click"/>
+                        </Grid>
+                    </Border>
                 </Grid>
 
-                <!-- CONSOLE VIEW -->
-                <views:ConsoleView Grid.Column="2" x:Name="ConsoleViewPanel"/>
+                <!-- COLUMN 4: CONSOLE SPLITTER -->
+                <GridSplitter Grid.Column="4" x:Name="ConsoleSplitter" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#232328" ResizeBehavior="PreviousAndNext"/>
+
+                <!-- COLUMN 5: RIGHT CONSOLE PANEL -->
+                <Grid Grid.Column="5" x:Name="ConsoleContainer">
+                    <views:ConsoleView x:Name="ConsoleViewPanel"/>
+                    <!-- Small toggle splitter handle to easily collapse -->
+                    <Button Content="✕" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" Background="Transparent" Foreground="{DynamicResource TextSecondary}" BorderThickness="0" Click="CollapseConsole_Click"/>
+                </Grid>
             </Grid>
 
             <!-- STATUS BAR -->

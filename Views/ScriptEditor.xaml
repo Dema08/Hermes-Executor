@@ -9,7 +9,7 @@
     <UserControl.Resources>
         <!-- TabItem Style -->
         <Style TargetType="TabItem">
-            <Setter Property="Background" Value="#1C1D21"/>
+            <Setter Property="Background" Value="{DynamicResource TabInactive}"/>
             <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Margin" Value="0,0,2,0"/>
@@ -29,16 +29,16 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#121316"/>
+                                <Setter Property="Background" Value="{DynamicResource TabActive}"/>
                                 <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                                 <Setter TargetName="Border" Property="BorderThickness" Value="0,0,0,2"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="False">
-                                <Setter Property="Background" Value="#18191D"/>
+                                <Setter Property="Background" Value="{DynamicResource TabInactive}"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
-                                <Setter Property="Background" Value="#222328"/>
+                                <Setter Property="Background" Value="{DynamicResource ControlBackgroundHover}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -58,7 +58,7 @@
                             </Grid.RowDefinitions>
                             
                             <!-- Tab Headers panel + plus button -->
-                            <Grid Grid.Row="0" Background="#18191D" Margin="0,0,0,5">
+                            <Grid Grid.Row="0" Background="{DynamicResource BackgroundMedium}" Margin="0,0,0,5">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -76,7 +76,7 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="btnBorder" Property="Background" Value="#2A2B30"/>
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource ControlBackgroundHover}"/>
                                                     <Setter Property="Foreground" Value="{DynamicResource HermesGold}"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>

@@ -1,37 +1,164 @@
 <UserControl
     x:Class="Hermes_Executor.Views.ScriptHubView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{DynamicResource BackgroundDark}"
+    SizeChanged="UserControl_SizeChanged"
+    ClipToBounds="True">
 
     <UserControl.Resources>
-
-        <!-- Hover border style for cards -->
+        <!-- Card Button Style with Hover Elevation -->
         <Style x:Key="CardButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource BackgroundMedium}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform X="0" Y="0"/>
+                </Setter.Value>
+            </Setter>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="CardBorder"
-                                Background="#1E1E22"
-                                BorderBrush="#2E2E36"
-                                BorderThickness="1"
-                                CornerRadius="10"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
                                 ClipToBounds="True">
                             <Border.Effect>
-                                <DropShadowEffect Color="#000000" BlurRadius="10" ShadowDepth="2" Opacity="0.4"/>
+                                <DropShadowEffect Color="#000000" BlurRadius="6" ShadowDepth="1" Opacity="0.25"/>
                             </Border.Effect>
                             <ContentPresenter/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="CardBorder" Property="BorderBrush" Value="#FFD600"/>
-                                <Setter TargetName="CardBorder" Property="Background" Value="#26262E"/>
+                                <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource HermesGold}"/>
+                                <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource ControlBackgroundHover}"/>
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform X="0" Y="-3"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="CardBorder" Property="Background" Value="#2E2E3A"/>
+                                <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource BackgroundLight}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom ToggleButton Template for ComboBox -->
+        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
+            <Border x:Name="Bd" 
+                    Background="{DynamicResource InputBackground}" 
+                    BorderBrush="{DynamicResource BorderBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="30" />
+                    </Grid.ColumnDefinitions>
+                    <Path x:Name="Arrow" 
+                          Grid.Column="1" 
+                          Fill="{DynamicResource TextSecondary}" 
+                          HorizontalAlignment="Center" 
+                          VerticalAlignment="Center" 
+                          Data="M 0 0 L 4 4 L 8 0 Z" />
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource HermesGold}"/>
+                    <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource HermesGold}"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="true">
+                    <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource HermesGold}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <!-- Style for ComboBoxItem -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" SnapsToDevicePixels="true" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HermesGold}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BackgroundDark}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HermesGold}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BackgroundDark}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom Dark ComboBox Style -->
+        <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,0,0,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton" 
+                                          Template="{StaticResource ComboBoxToggleButton}" 
+                                          Grid.Column="2" 
+                                          Focusable="false" 
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <ContentPresenter x:Name="ContentSite" 
+                                              IsHitTestVisible="false" 
+                                              Content="{TemplateBinding SelectionBoxItem}" 
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
+                                              Margin="{TemplateBinding Padding}" 
+                                              HorizontalAlignment="Left" 
+                                              VerticalAlignment="Center"/>
+                            <Popup x:Name="Popup" 
+                                   Placement="Bottom" 
+                                   IsOpen="{TemplateBinding IsDropDownOpen}" 
+                                   AllowsTransparency="true" 
+                                   Focusable="false" 
+                                   PopupAnimation="Slide">
+                                <Grid x:Name="DropDown" 
+                                      SnapsToDevicePixels="true" 
+                                      MinWidth="{TemplateBinding ActualWidth}" 
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder" 
+                                            Background="{DynamicResource InputBackground}" 
+                                            BorderBrush="{DynamicResource BorderBrush}" 
+                                            BorderThickness="1" 
+                                            CornerRadius="6"/>
+                                    <ScrollViewer Margin="2" SnapsToDevicePixels="true">
+                                        <StackPanel IsItemsHost="true" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="DropDownBorder" Property="Height" Value="95"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -41,9 +168,9 @@
 
         <!-- Action button style -->
         <Style x:Key="ActionBtnPrimary" TargetType="Button">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="Background" Value="#FFD600"/>
-            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="{DynamicResource HermesGold}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BackgroundDark}"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -55,10 +182,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#FFE640"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HermesGoldLight}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#C8AA00"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HermesGoldDark}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -67,23 +194,25 @@
         </Style>
 
         <Style x:Key="ActionBtnSecondary" TargetType="Button">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="Background" Value="#2A2A32"/>
-            <Setter Property="Foreground" Value="#CCCCCC"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#36364A"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ControlBackgroundHover}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource HermesGold}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#222230"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BackgroundMedium}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -93,10 +222,10 @@
 
         <!-- SearchBox style -->
         <Style x:Key="SearchBoxStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="#1A1A20"/>
-            <Setter Property="Foreground" Value="#E0E0E0"/>
-            <Setter Property="CaretBrush" Value="#FFD600"/>
-            <Setter Property="BorderBrush" Value="#333340"/>
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource HermesGold}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -112,311 +241,299 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#FFD600"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource HermesGold}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-
+        <!-- Fade-in / Slide-up Storyboard for View Items -->
+        <Storyboard x:Key="FadeInStoryboard">
+            <DoubleAnimation Storyboard.TargetName="HeaderPanel" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="SearchBorder" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.25" BeginTime="0:0:0.08">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ResultsScroll" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3" BeginTime="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" Storyboard.TargetName="HeaderPanel" From="15" To="0" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" Storyboard.TargetName="SearchBorder" From="15" To="0" Duration="0:0:0.25" BeginTime="0:0:0.08">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" Storyboard.TargetName="ResultsScroll" From="20" To="0" Duration="0:0:0.3" BeginTime="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
     </UserControl.Resources>
 
-    <Grid Background="#13131A">
-
+    <Grid>
         <Grid.RowDefinitions>
+            <!-- Row 0: Header Area -->
             <RowDefinition Height="Auto"/>
+            <!-- Row 1: Search & Sort Bar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Row 2: Main Results scroll -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- SEARCH BAR -->
-        <Border Grid.Row="0"
-                Margin="12,12,12,8"
-                Padding="10"
-                Background="#1A1A22"
-                CornerRadius="8"
-                BorderBrush="#2A2A35"
-                BorderThickness="1">
+        <!-- ROW 0: HEADER -->
+        <Grid Grid.Row="0" Margin="20,15,20,5" x:Name="HeaderPanel" RenderTransformOrigin="0.5,0.5" Opacity="0">
+            <Grid.RenderTransform>
+                <TranslateTransform Y="15"/>
+            </Grid.RenderTransform>
+            <StackPanel>
+                <TextBlock Text="Explore Scripts" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                <TextBlock Text="Discover and run community scripts." FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Grid>
 
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="110"/>
-                </Grid.ColumnDefinitions>
+        <!-- ROW 1: SEARCH & SORT BAR -->
+        <Border Grid.Row="1" Margin="20,5,20,10" Padding="12" Background="{DynamicResource BackgroundLight}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" x:Name="SearchBorder" RenderTransformOrigin="0.5,0.5" Opacity="0">
+            <Border.RenderTransform>
+                <TranslateTransform Y="15"/>
+            </Border.RenderTransform>
+            <DockPanel LastChildFill="True">
+                <!-- Sorting filter -->
+                <ComboBox DockPanel.Dock="Right"
+                          x:Name="ComboSort"
+                          Height="36"
+                          Width="120"
+                          Margin="6,0,0,0"
+                          Style="{StaticResource DarkComboBoxStyle}"
+                          SelectionChanged="ComboSort_SelectionChanged">
+                    <ComboBoxItem Content="Popular" Tag="Popular" IsSelected="True"/>
+                    <ComboBoxItem Content="Recent" Tag="Recent"/>
+                </ComboBox>
 
-                <TextBox
-                    x:Name="SearchBox"
-                    Height="36"
-                    Style="{StaticResource SearchBoxStyle}"
-                    KeyDown="SearchBox_KeyDown"/>
+                <!-- Search Button -->
+                <Button DockPanel.Dock="Right"
+                        x:Name="SearchButton"
+                        Margin="6,0,0,0"
+                        Height="36"
+                        Width="80"
+                        Content="Search"
+                        Style="{StaticResource ActionBtnPrimary}"
+                        Click="SearchButton_Click"/>
 
-                <Button
-                    Grid.Column="1"
-                    x:Name="SearchButton"
-                    Margin="10,0,0,0"
-                    Height="36"
-                    Content="🔍  SEARCH"
-                    Style="{StaticResource ActionBtnPrimary}"
-                    Click="SearchButton_Click"/>
-            </Grid>
+                <!-- Search box + icon overlay (8px space between icon and text) -->
+                <Grid>
+                    <TextBox x:Name="SearchBox"
+                             Height="36"
+                             Padding="26,0,10,0"
+                             Style="{StaticResource SearchBoxStyle}"
+                             KeyDown="SearchBox_KeyDown"
+                             VerticalContentAlignment="Center"
+                             ToolTip="Masukkan nama script atau judul game..."
+                             HorizontalAlignment="Stretch"/>
+                    <TextBlock Text="🔍" Foreground="{DynamicResource TextSecondary}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="8,0,0,0" IsHitTestVisible="False"/>
+                </Grid>
+            </DockPanel>
         </Border>
 
-        <!-- RESULT SCROLL -->
-        <ScrollViewer
-            Grid.Row="1"
-            Margin="12,0,12,12"
-            VerticalScrollBarVisibility="Auto"
-            HorizontalScrollBarVisibility="Disabled">
+        <!-- LOADING BAR INDICATOR -->
+        <ProgressBar Grid.Row="2" x:Name="SearchProgressBar" IsIndeterminate="True" Height="3" VerticalAlignment="Top" Visibility="Collapsed" Foreground="{DynamicResource HermesGold}" Background="Transparent" BorderThickness="0"/>
 
+        <!-- ROW 2: RESULT SCROLL (GRID LAYOUT WITH PROPORTIONAL WIDE CARDS) -->
+        <ScrollViewer Grid.Row="2" Margin="10,0,10,10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="ResultsScroll" RenderTransformOrigin="0.5,0.5" Opacity="0">
+            <ScrollViewer.RenderTransform>
+                <TranslateTransform Y="20"/>
+            </ScrollViewer.RenderTransform>
             <ItemsControl x:Name="ResultsList">
-
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal"/>
+                        <UniformGrid Columns="{Binding ColumnsCount, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-
-                        <Button
-                            Width="210"
-                            Height="215"
-                            Margin="6"
-                            Style="{StaticResource CardButtonStyle}"
-                            Tag="{Binding}"
-                            Click="ScriptCard_Click">
-
+                        <Button Height="220"
+                                Margin="6"
+                                Style="{StaticResource CardButtonStyle}"
+                                Tag="{Binding}"
+                                Click="ScriptCard_Click">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="128"/>
+                                    <RowDefinition Height="110"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- THUMBNAIL AREA -->
+                                <!-- THUMBNAIL -->
                                 <Grid Grid.Row="0">
-                                    <!-- Dark placeholder background -->
-                                    <Border Background="#0D0D12" CornerRadius="10,10,0,0"/>
+                                    <Border Background="{DynamicResource BackgroundDark}"/>
+                                    <TextBlock Text="📜" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.15"/>
+                                    
+                                    <Image x:Name="ThumbImg"
+                                           Source="{Binding ThumbnailImage}"
+                                           Stretch="UniformToFill"
+                                           RenderOptions.BitmapScalingMode="HighQuality"/>
 
-                                    <!-- Placeholder icon when no image -->
-                                    <TextBlock
-                                        Text="📜"
-                                        FontSize="36"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Opacity="0.3"/>
-
-                                    <!-- Actual image loaded via code-behind tag -->
-                                    <Image
-                                        x:Name="ThumbImg"
-                                        Source="{Binding ThumbnailImage}"
-                                        Stretch="UniformToFill"
-                                        RenderOptions.BitmapScalingMode="HighQuality"/>
-
-                                    <!-- Top gradient overlay for badges -->
-                                    <Border CornerRadius="10,10,0,0">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                <GradientStop Color="#60000000" Offset="0"/>
-                                                <GradientStop Color="#00000000" Offset="0.5"/>
-                                                <GradientStop Color="#80000000" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Border.Background>
+                                    <!-- Category/Game tag badge -->
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Padding="6,3" Background="#E6101014" BorderBrush="{DynamicResource HermesGold}" BorderThickness="1" CornerRadius="4">
+                                        <TextBlock Text="{Binding Game}" Foreground="{DynamicResource HermesGold}" FontSize="9" FontWeight="Bold" MaxWidth="100" TextTrimming="CharacterEllipsis"/>
                                     </Border>
 
-                                    <!-- VIEWS badge - top left -->
-                                    <Border
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Top"
-                                        Margin="7,7,0,0"
-                                        Padding="7,3"
-                                        Background="#CC0D0D14"
-                                        CornerRadius="10">
-                                        <TextBlock
-                                            Foreground="#DDDDDD"
-                                            FontSize="10"
-                                            FontWeight="Medium">
-                                            <Run Text="◉ "/><Run Text="{Binding Views}"/>
+                                    <!-- Views count badge -->
+                                    <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8" Padding="6,3" Background="#E6101014" CornerRadius="4">
+                                        <TextBlock Foreground="#DDDDDD" FontSize="9">
+                                            <Run Text="👁 "/>
+                                            <Run Text="{Binding Views, StringFormat={}{0:N0}}"/>
                                         </TextBlock>
-                                    </Border>
-
-                                    <!-- PROVIDER badge - top right -->
-                                    <Border
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Top"
-                                        Margin="0,7,7,0"
-                                        Padding="7,3"
-                                        Background="#CC0D0D14"
-                                        CornerRadius="10">
-                                        <TextBlock
-                                            Text="{Binding Provider}"
-                                            Foreground="#FFD600"
-                                            FontSize="10"
-                                            FontWeight="SemiBold"/>
                                     </Border>
                                 </Grid>
 
-                                <!-- INFO SECTION -->
-                                <StackPanel
-                                    Grid.Row="1"
-                                    Margin="10,8,10,8"
-                                    VerticalAlignment="Top">
+                                <!-- INFO BODY -->
+                                <Grid Grid.Row="1" Margin="10,6">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                    <TextBlock
-                                        Text="{Binding Title}"
-                                        Foreground="#EEEEEE"
-                                        FontWeight="SemiBold"
-                                        FontSize="12"
-                                        TextWrapping="Wrap"
-                                        MaxHeight="38"
-                                        LineHeight="18"/>
+                                    <!-- Title -->
+                                    <TextBlock Grid.Row="0" Text="{Binding Title}" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="12" TextTrimming="CharacterEllipsis" MaxHeight="18"/>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                        <TextBlock Text="🎮 " FontSize="10" Foreground="#888"/>
-                                        <TextBlock
-                                            Text="{Binding Game}"
-                                            Foreground="#999999"
-                                            FontSize="10"/>
-                                    </StackPanel>
+                                    <!-- Description (Max 2 lines) -->
+                                    <TextBlock Grid.Row="1" Text="{Binding Description}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,3,0,0" TextWrapping="Wrap" TextTrimming="WordEllipsis" MaxHeight="32" LineHeight="14"/>
 
-                                </StackPanel>
-
+                                    <!-- Author and Button Grid -->
+                                    <Grid Grid.Row="2" Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBlock Grid.Column="0" Text="{Binding Author, StringFormat='👤 {0}'}" Foreground="{DynamicResource TextMuted}" FontSize="9" FontStyle="Italic" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,5,0"/>
+                                        
+                                        <Border Grid.Column="1" Background="{DynamicResource HermesGold}" Padding="10,4" CornerRadius="4" VerticalAlignment="Center">
+                                            <TextBlock Text="VIEW DETAILS" Foreground="{DynamicResource BackgroundDark}" FontWeight="Bold" FontSize="9"/>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
                             </Grid>
-
                         </Button>
-
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
-
             </ItemsControl>
-
         </ScrollViewer>
 
         <!-- EMPTY STATE -->
-        <StackPanel
-            x:Name="EmptyState"
-            Grid.Row="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Visibility="Collapsed">
-            <TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center" Opacity="0.3"/>
-            <TextBlock
-                x:Name="EmptyStateText"
-                Text="Ketik nama game atau script untuk mencari"
-                Foreground="#555566"
-                FontSize="13"
-                Margin="0,12,0,0"
-                HorizontalAlignment="Center"/>
+        <StackPanel x:Name="EmptyState"
+                    Grid.Row="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="Collapsed">
+            <TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center" Opacity="0.2"/>
+            <TextBlock x:Name="EmptyStateText"
+                       Text="Ketik nama game atau script untuk mencari"
+                       Foreground="{DynamicResource TextSecondary}"
+                       FontSize="13"
+                       Margin="0,10,0,0"
+                       HorizontalAlignment="Center"/>
         </StackPanel>
 
-        <!-- ACTION OVERLAY -->
-        <Grid
-            x:Name="ActionOverlay"
-            Grid.RowSpan="2"
-            Visibility="Collapsed"
-            Background="#CC000000">
+        <!-- DETAILS MODAL OVERLAY -->
+        <Grid x:Name="ActionOverlay"
+              Grid.RowSpan="3"
+              Visibility="Collapsed"
+              Background="#CC000000">
 
-            <Border
-                Width="440"
-                Padding="20"
-                Background="#1C1C24"
-                BorderBrush="#3A3A48"
-                BorderThickness="1"
-                CornerRadius="12"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center">
+            <Border MaxWidth="460"
+                    Width="Auto"
+                    MinWidth="300"
+                    Padding="20"
+                    Margin="20"
+                    Background="{DynamicResource BackgroundMedium}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
                 <Border.Effect>
-                    <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="0" Opacity="0.7"/>
+                    <DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="0" Opacity="0.6"/>
                 </Border.Effect>
 
                 <StackPanel>
-
-                    <!-- Header -->
-                    <Grid Margin="0,0,0,14">
-                        <TextBlock
-                            x:Name="ActionTitle"
-                            Text="Script"
-                            Foreground="White"
-                            FontSize="16"
-                            FontWeight="Bold"
-                            VerticalAlignment="Center"
-                            Margin="0,0,35,0"
-                            TextWrapping="Wrap"/>
-
-                        <Button
-                            Content="✕"
-                            Width="30"
-                            Height="30"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            Foreground="#888"
-                            Style="{StaticResource ActionBtnSecondary}"
-                            Click="CloseAction_Click"/>
+                    <!-- Header details -->
+                    <Grid Margin="0,0,0,15">
+                        <TextBlock x:Name="ActionTitle"
+                                   Text="Script Details"
+                                   Foreground="{DynamicResource TextPrimary}"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,30,0"
+                                   TextWrapping="Wrap"/>
+                        <Button Content="✕"
+                                Width="26"
+                                Height="26"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Background="Transparent"
+                                Foreground="{DynamicResource TextSecondary}"
+                                Style="{StaticResource ActionBtnSecondary}"
+                                Click="CloseAction_Click"/>
                     </Grid>
 
-                    <!-- Thumbnail -->
-                    <Border
-                        Height="170"
-                        Background="#0D0D12"
-                        CornerRadius="8"
-                        ClipToBounds="True">
-
+                    <!-- Preview Thumbnail -->
+                    <Border Height="180"
+                            Background="{DynamicResource BackgroundDark}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            ClipToBounds="True">
                         <Grid>
-                            <!-- Placeholder -->
-                            <TextBlock
-                                Text="📜"
-                                FontSize="48"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Opacity="0.2"/>
-
-                            <Image
-                                x:Name="ActionThumbnail"
-                                Stretch="UniformToFill"
-                                RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock Text="📜" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.1"/>
+                            <Image x:Name="ActionThumbnail" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
                         </Grid>
-
                     </Border>
 
                     <!-- Info -->
-                    <TextBlock
-                        x:Name="ActionGame"
-                        Foreground="#FFD600"
-                        FontWeight="SemiBold"
-                        Margin="0,12,0,2"/>
+                    <TextBlock x:Name="ActionGame"
+                               Foreground="{DynamicResource HermesGold}"
+                               FontWeight="Bold"
+                               FontSize="13"
+                               Margin="0,12,0,2"/>
 
-                    <TextBlock
-                        x:Name="ActionProvider"
-                        Foreground="#666688"
-                        FontSize="12"
-                        Margin="0,0,0,16"/>
+                    <TextBlock x:Name="ActionProvider"
+                               Foreground="{DynamicResource TextSecondary}"
+                               FontSize="11"
+                               Margin="0,0,0,15"/>
 
-                    <!-- Execute -->
-                    <Button
-                        Margin="0,0,0,6"
-                        Content="▶   EXECUTE SCRIPT"
-                        Style="{StaticResource ActionBtnPrimary}"
-                        Click="ExecuteSelected_Click"/>
+                    <!-- Action buttons -->
+                    <Button Margin="0,0,0,8"
+                            Content="▶   EXECUTE SCRIPT"
+                            Style="{StaticResource ActionBtnPrimary}"
+                            Click="ExecuteSelected_Click"/>
 
-                    <!-- Copy -->
-                    <Button
-                        Margin="0,0,0,6"
-                        Content="📋   COPY TO CLIPBOARD"
-                        Style="{StaticResource ActionBtnSecondary}"
-                        Click="CopySelected_Click"/>
+                    <Button Margin="0,0,0,8"
+                            Content="📋   COPY TO CLIPBOARD"
+                            Style="{StaticResource ActionBtnSecondary}"
+                            Click="CopySelected_Click"/>
 
-                    <!-- New tab -->
-                    <Button
-                        Content="＋   OPEN IN NEW TAB"
-                        Style="{StaticResource ActionBtnSecondary}"
-                        Click="OpenTabSelected_Click"/>
-
+                    <Button Content="＋   OPEN IN NEW TAB"
+                            Style="{StaticResource ActionBtnSecondary}"
+                            Click="OpenTabSelected_Click"/>
                 </StackPanel>
-
             </Border>
-
         </Grid>
-
     </Grid>
-
 </UserControl>

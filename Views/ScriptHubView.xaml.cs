@@ -14,11 +14,44 @@ using Hermes_Executor.Models;
 
 namespace Hermes_Executor.Views
 {
-    public partial class ScriptHubView : UserControl
+    public partial class ScriptHubView : UserControl, System.ComponentModel.INotifyPropertyChanged
     {
-        private readonly ScriptSearchService _searchService;
+        private readonly ScriptSearchService? _searchService;
         private readonly ObservableCollection<ScriptItem> _results = new();
+        private readonly List<ScriptItem> _originalResults = new();
         private ScriptItem? _selectedScript;
+
+        private int _columnsCount = 3;
+        public int ColumnsCount
+        {
+            get => _columnsCount;
+            set
+            {
+                if (_columnsCount != value)
+                {
+                    _columnsCount = value;
+                    OnPropertyChanged(nameof(ColumnsCount));
+                }
+            }
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string name)
+            => PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(name));
+
+        private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            double availableWidth = e.NewSize.Width - 40;
+            if (availableWidth < 280)
+            {
+                ColumnsCount = 1;
+            }
+            else
+            {
+                int cols = (int)Math.Max(1, Math.Floor(availableWidth / 280));
+                ColumnsCount = cols;
+            }
+        }
 
         private static readonly HttpClient _httpClient = CreateHttpClient();
 
@@ -43,28 +76,29 @@ namespace Hermes_Executor.Views
 
             if (!string.IsNullOrWhiteSpace(apiKey))
             {
-                IScriptProvider[] providers =
-                {
-                    new RScriptProvider(apiKey)
-                };
-
+                IScriptProvider[] providers = { new RScriptProvider(apiKey) };
                 _searchService = new ScriptSearchService(providers);
             }
             else
             {
-                IScriptProvider[] providers =
-                {
-                    new MockScriptProvider()
-                };
-
+                IScriptProvider[] providers = { new MockScriptProvider() };
                 _searchService = new ScriptSearchService(providers);
+            }
+
+            Loaded += (s, e) => TriggerFadeIn();
+        }
+
+        public void TriggerFadeIn()
+        {
+            if (FindResource("FadeInStoryboard") is System.Windows.Media.Animation.Storyboard sb)
+            {
+                sb.Begin(this);
             }
         }
 
-        private async void SearchButton_Click(
-            object sender,
-            RoutedEventArgs e)
+        private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_searchService == null) return;
             string query = SearchBox.Text.Trim();
 
             if (string.IsNullOrWhiteSpace(query))
@@ -72,15 +106,18 @@ namespace Hermes_Executor.Views
 
             try
             {
+                SearchProgressBar.Visibility = Visibility.Visible;
                 SearchBox.IsEnabled = false;
                 SearchButton.IsEnabled = false;
+                
+                _originalResults.Clear();
                 _results.Clear();
                 EmptyState.Visibility = Visibility.Collapsed;
 
                 var results = await _searchService.SearchAsync(query);
+                _originalResults.AddRange(results);
 
-                foreach (ScriptItem script in results)
-                    _results.Add(script);
+                ApplyFiltersAndSorting();
 
                 if (results.Count == 0)
                 {
@@ -89,7 +126,6 @@ namespace Hermes_Executor.Views
                 }
                 else
                 {
-                    // Load thumbnails in parallel in the background
                     _ = LoadThumbnailsAsync(results);
                 }
             }
@@ -102,17 +138,55 @@ namespace Hermes_Executor.Views
             }
             finally
             {
+                SearchProgressBar.Visibility = Visibility.Collapsed;
                 SearchBox.IsEnabled = true;
                 SearchButton.IsEnabled = true;
                 SearchBox.Focus();
             }
         }
 
-        /// <summary>
-        /// Loads thumbnails for all scripts in parallel and updates
-        /// each ScriptItem.ThumbnailImage so the UI updates automatically via binding.
-        /// </summary>
-        private async Task LoadThumbnailsAsync(System.Collections.Generic.List<ScriptItem> scripts)
+        private void ApplyFiltersAndSorting()
+        {
+            if (_originalResults == null) return;
+
+            var filtered = _originalResults.AsEnumerable();
+
+            // Sort by views or update time
+            string sortBy = "Popular";
+            if (ComboSort != null && ComboSort.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
+            {
+                sortBy = selectedItem.Tag.ToString()!;
+            }
+
+            filtered = sortBy switch
+            {
+                "Recent" => filtered.OrderByDescending(x => x.UpdatedAt ?? DateTime.MinValue),
+                "Popular" => filtered.OrderByDescending(x => x.Views),
+                _ => filtered.OrderByDescending(x => x.Views)
+            };
+
+            _results.Clear();
+            foreach (var script in filtered)
+            {
+                _results.Add(script);
+            }
+
+            if (EmptyState != null)
+            {
+                EmptyState.Visibility = _results.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+                if (_results.Count == 0)
+                {
+                    EmptyStateText.Text = "Tidak ada script yang cocok dengan filter pencarian.";
+                }
+            }
+        }
+
+        private void ComboSort_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyFiltersAndSorting();
+        }
+
+        private async Task LoadThumbnailsAsync(List<ScriptItem> scripts)
         {
             var tasks = scripts.Select(async script =>
             {
@@ -148,46 +222,27 @@ namespace Hermes_Executor.Views
             await Task.WhenAll(tasks);
         }
 
-        private void SearchBox_KeyDown(
-            object sender,
-            KeyEventArgs e)
+        private void SearchBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                SearchButton_Click(
-                    sender,
-                    new RoutedEventArgs(Button.ClickEvent));
+                SearchButton_Click(sender, new RoutedEventArgs(Button.ClickEvent));
             }
         }
 
-        private async void ScriptCard_Click(
-            object sender,
-            RoutedEventArgs e)
+        private async void ScriptCard_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button button ||
-                button.Tag is not ScriptItem script)
-            {
+            if (sender is not Button button || button.Tag is not ScriptItem script)
                 return;
-            }
 
             _selectedScript = script;
 
-            ActionTitle.Text =
-                string.IsNullOrWhiteSpace(script.Title)
-                    ? "Untitled Script"
-                    : script.Title;
+            ActionTitle.Text = string.IsNullOrWhiteSpace(script.Title) ? "Untitled Script" : script.Title;
+            ActionGame.Text = string.IsNullOrWhiteSpace(script.Game) ? "Game: -" : $"🎮  {script.Game}";
+            ActionProvider.Text = string.IsNullOrWhiteSpace(script.Provider)
+                ? "Provider: -"
+                : $"Provider: {script.Provider}  •  {script.Views:N0} views";
 
-            ActionGame.Text =
-                string.IsNullOrWhiteSpace(script.Game)
-                    ? "Game: -"
-                    : $"🎮  {script.Game}";
-
-            ActionProvider.Text =
-                string.IsNullOrWhiteSpace(script.Provider)
-                    ? "Provider: -"
-                    : $"Provider: {script.Provider}  •  {script.Views:N0} views";
-
-            // Reuse already-loaded thumbnail from card; try loading if not yet available
             if (script.ThumbnailImage != null)
             {
                 ActionThumbnail.Source = script.ThumbnailImage;
@@ -222,20 +277,15 @@ namespace Hermes_Executor.Views
             ActionOverlay.Visibility = Visibility.Visible;
         }
 
-        private void CloseAction_Click(
-            object sender,
-            RoutedEventArgs e)
+        private void CloseAction_Click(object sender, RoutedEventArgs e)
         {
             ActionOverlay.Visibility = Visibility.Collapsed;
             _selectedScript = null;
         }
 
-        private void CopySelected_Click(
-            object sender,
-            RoutedEventArgs e)
+        private void CopySelected_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedScript == null)
-                return;
+            if (_selectedScript == null) return;
 
             if (string.IsNullOrWhiteSpace(_selectedScript.Script))
             {
@@ -246,31 +296,25 @@ namespace Hermes_Executor.Views
                 return;
             }
 
-             Clipboard.SetText(_selectedScript.Script);
+            Clipboard.SetText(_selectedScript.Script);
 
-             HermesMessageBox.Show(
-                 "Script Copied",
-                 "Script berhasil disalin ke clipboard.",
-                 HermesMessageBox.NotificationType.Success);
+            HermesMessageBox.Show(
+                "Script Copied",
+                "Script berhasil disalin ke clipboard.",
+                HermesMessageBox.NotificationType.Success);
         }
 
-        private void OpenTabSelected_Click(
-            object sender,
-            RoutedEventArgs e)
+        private void OpenTabSelected_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedScript == null)
-                return;
+            if (_selectedScript == null) return;
 
             OpenInNewTabRequested?.Invoke(_selectedScript);
             ActionOverlay.Visibility = Visibility.Collapsed;
         }
 
-        private void ExecuteSelected_Click(
-            object sender,
-            RoutedEventArgs e)
+        private void ExecuteSelected_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedScript == null)
-                return;
+            if (_selectedScript == null) return;
 
             ExecuteRequested?.Invoke(_selectedScript);
             ActionOverlay.Visibility = Visibility.Collapsed;
