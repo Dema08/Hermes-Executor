@@ -1,8 +1,11 @@
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Media.Imaging;
 
 namespace Hermes_Executor.Models;
 
-public class ScriptItem
+public class ScriptItem : INotifyPropertyChanged
 {
     public string Id { get; set; } = "";
 
@@ -25,4 +28,20 @@ public class ScriptItem
     public int Views { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    private BitmapImage? _thumbnailImage;
+    public BitmapImage? ThumbnailImage
+    {
+        get => _thumbnailImage;
+        set
+        {
+            _thumbnailImage = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string? name = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }

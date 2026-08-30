@@ -175,12 +175,7 @@ public class RScriptProvider : IScriptProvider
                         "lua"
                     ),
 
-                    ThumbnailUrl = GetStringOrNull(
-                        item,
-                        "thumbnail",
-                        "thumbnailUrl",
-                        "image"
-                    ),
+                    ThumbnailUrl = GetThumbnailUrl(item),
 
                     SourceUrl = GetStringOrNull(
                         item,
@@ -281,6 +276,27 @@ public class RScriptProvider : IScriptProvider
         return "";
     }
 
+
+    private static string? GetThumbnailUrl(JToken item)
+    {
+        string value = GetString(item, "imageUrl", "thumbnail", "thumbnailUrl", "image");
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            return value;
+        }
+
+        JToken? game = FindProperty(item, "game");
+        if (game != null)
+        {
+            value = GetString(game, "thumbnailUrl", "logoUrl", "image");
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return null;
+    }
 
     private static string? GetStringOrNull(
         JToken token,

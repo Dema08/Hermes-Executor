@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,6 +20,15 @@ namespace Hermes_Executor.Views
         private readonly ObservableCollection<ScriptItem> _results = new();
         private ScriptItem? _selectedScript;
 
+        private static readonly HttpClient _httpClient = CreateHttpClient();
+
+        private static HttpClient CreateHttpClient()
+        {
+            var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            return client;
+        }
+
         public event Action<ScriptItem>? ExecuteRequested;
         public event Action<ScriptItem>? OpenInNewTabRequested;
 
@@ -24,6 +37,7 @@ namespace Hermes_Executor.Views
             InitializeComponent();
 
             ResultsList.ItemsSource = _results;
+            EmptyState.Visibility = Visibility.Visible;
 
             string? apiKey = ApiKeyManager.LoadApiKey();
 
@@ -59,20 +73,24 @@ namespace Hermes_Executor.Views
             try
             {
                 SearchBox.IsEnabled = false;
+                SearchButton.IsEnabled = false;
                 _results.Clear();
+                EmptyState.Visibility = Visibility.Collapsed;
 
-                var results =
-                    await _searchService.SearchAsync(query);
+                var results = await _searchService.SearchAsync(query);
 
                 foreach (ScriptItem script in results)
                     _results.Add(script);
 
                 if (results.Count == 0)
                 {
-                    HermesMessageBox.Show(
-                        "Script Hub",
-                        $"Tidak ada script untuk \"{query}\".",
-                        HermesMessageBox.NotificationType.Info);
+                    EmptyStateText.Text = $"Tidak ada script untuk \"{query}\"";
+                    EmptyState.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    // Load thumbnails in parallel in the background
+                    _ = LoadThumbnailsAsync(results);
                 }
             }
             catch (Exception ex)
@@ -85,8 +103,49 @@ namespace Hermes_Executor.Views
             finally
             {
                 SearchBox.IsEnabled = true;
+                SearchButton.IsEnabled = true;
                 SearchBox.Focus();
             }
+        }
+
+        /// <summary>
+        /// Loads thumbnails for all scripts in parallel and updates
+        /// each ScriptItem.ThumbnailImage so the UI updates automatically via binding.
+        /// </summary>
+        private async Task LoadThumbnailsAsync(System.Collections.Generic.List<ScriptItem> scripts)
+        {
+            var tasks = scripts.Select(async script =>
+            {
+                if (string.IsNullOrWhiteSpace(script.ThumbnailUrl))
+                    return;
+
+                if (!Uri.TryCreate(script.ThumbnailUrl, UriKind.Absolute, out Uri? uri))
+                    return;
+
+                try
+                {
+                    byte[] data = await _httpClient.GetByteArrayAsync(uri);
+
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        try
+                        {
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.StreamSource = new System.IO.MemoryStream(data);
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.EndInit();
+                            bitmap.Freeze();
+
+                            script.ThumbnailImage = bitmap;
+                        }
+                        catch { }
+                    });
+                }
+                catch { }
+            });
+
+            await Task.WhenAll(tasks);
         }
 
         private void SearchBox_KeyDown(
@@ -101,7 +160,7 @@ namespace Hermes_Executor.Views
             }
         }
 
-        private void ScriptCard_Click(
+        private async void ScriptCard_Click(
             object sender,
             RoutedEventArgs e)
         {
@@ -121,34 +180,42 @@ namespace Hermes_Executor.Views
             ActionGame.Text =
                 string.IsNullOrWhiteSpace(script.Game)
                     ? "Game: -"
-                    : $"Game: {script.Game}";
+                    : $"🎮  {script.Game}";
 
             ActionProvider.Text =
                 string.IsNullOrWhiteSpace(script.Provider)
                     ? "Provider: -"
-                    : $"Provider: {script.Provider}";
+                    : $"Provider: {script.Provider}  •  {script.Views:N0} views";
 
-            ActionThumbnail.Source = null;
-
-            if (!string.IsNullOrWhiteSpace(script.ThumbnailUrl) &&
-                Uri.TryCreate(
-                    script.ThumbnailUrl,
-                    UriKind.Absolute,
-                    out Uri? thumbnailUri))
+            // Reuse already-loaded thumbnail from card; try loading if not yet available
+            if (script.ThumbnailImage != null)
             {
-                try
-                {
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.UriSource = thumbnailUri;
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
+                ActionThumbnail.Source = script.ThumbnailImage;
+            }
+            else
+            {
+                ActionThumbnail.Source = null;
 
-                    ActionThumbnail.Source = bitmap;
-                }
-                catch
+                if (!string.IsNullOrWhiteSpace(script.ThumbnailUrl) &&
+                    Uri.TryCreate(script.ThumbnailUrl, UriKind.Absolute, out Uri? thumbnailUri))
                 {
-                    ActionThumbnail.Source = null;
+                    try
+                    {
+                        byte[] data = await _httpClient.GetByteArrayAsync(thumbnailUri);
+                        var bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.StreamSource = new System.IO.MemoryStream(data);
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.EndInit();
+                        bitmap.Freeze();
+
+                        script.ThumbnailImage = bitmap;
+                        ActionThumbnail.Source = bitmap;
+                    }
+                    catch
+                    {
+                        ActionThumbnail.Source = null;
+                    }
                 }
             }
 
