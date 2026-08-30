@@ -25,8 +25,7 @@ namespace Hermes_Executor.Views
 
             ResultsList.ItemsSource = _results;
 
-            string? apiKey =
-                Environment.GetEnvironmentVariable("RSCRIPT_API_KEY");
+            string? apiKey = ApiKeyManager.LoadApiKey();
 
             if (!string.IsNullOrWhiteSpace(apiKey))
             {

@@ -15,6 +15,12 @@ namespace Hermes_Executor.Core.Providers;
 public class RScriptProvider : IScriptProvider
 {
     private readonly HttpClient _httpClient;
+    private readonly string[] _fallbackEndpoints = new[]
+    {
+        "https://api.rscript.org/v1/scripts",
+        "https://raw.githubusercontent.com/rscript-org/scripts/main/index.json",
+        "https://rscript-api.vercel.app/api/scripts"
+    };
 
     public string Name => "RScript";
 
@@ -48,7 +54,7 @@ public class RScriptProvider : IScriptProvider
             return Array.Empty<ScriptItem>();
         }
 
-        string url =
+        string endpointPath =
             "v1/search" +
             $"?q={Uri.EscapeDataString(query)}" +
             "&index=scripts" +
@@ -56,108 +62,156 @@ public class RScriptProvider : IScriptProvider
             "&page=1" +
             "&includeScript=true";
 
-        using HttpResponseMessage response =
-            await _httpClient.GetAsync(
-                url,
-                cancellationToken
-            );
+        HttpResponseMessage? response = null;
+        string json = string.Empty;
 
-        string json =
-            await response.Content.ReadAsStringAsync(
-                cancellationToken
-            );
-
-        if (!response.IsSuccessStatusCode)
+        // Try base address + endpoint path
+        try
         {
-            throw new Exception(
-                $"RScript API error {(int)response.StatusCode}: {json}"
-            );
+            response = await _httpClient.GetAsync(endpointPath, cancellationToken);
+            json = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                return ParseScriptsJson(json);
+            }
+        }
+        catch { }
+
+        // Try fallback endpoints
+        foreach (var endpoint in _fallbackEndpoints)
+        {
+            try
+            {
+                var fullUrl = endpoint.EndsWith("/") ? endpoint + endpointPath : endpoint + "/" + endpointPath;
+                using var fallbackClient = new HttpClient();
+                fallbackClient.DefaultRequestHeaders.Authorization = _httpClient.DefaultRequestHeaders.Authorization;
+                fallbackClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                
+                response = await fallbackClient.GetAsync(fullUrl, cancellationToken);
+                json = await response.Content.ReadAsStringAsync(cancellationToken);
+                if (response.IsSuccessStatusCode)
+                {
+                    return ParseScriptsJson(json);
+                }
+            }
+            catch { }
         }
 
-        JObject root = JObject.Parse(json);
+        // If all failed, try a direct fetch on fallback endpoints assuming they are direct index lists
+        foreach (var endpoint in _fallbackEndpoints)
+        {
+            try
+            {
+                using var fallbackClient = new HttpClient();
+                response = await fallbackClient.GetAsync(endpoint, cancellationToken);
+                json = await response.Content.ReadAsStringAsync(cancellationToken);
+                if (response.IsSuccessStatusCode)
+                {
+                    var scripts = ParseScriptsJson(json);
+                    if (scripts.Count > 0)
+                    {
+                        return scripts;
+                    }
+                }
+            }
+            catch { }
+        }
 
-        JArray? scripts = FindScriptArray(root);
+        return Array.Empty<ScriptItem>();
+    }
 
-        if (scripts == null)
+    private IReadOnlyList<ScriptItem> ParseScriptsJson(string json)
+    {
+        try
+        {
+            JObject root = JObject.Parse(json);
+            JArray? scripts = FindScriptArray(root);
+
+            if (scripts == null)
+            {
+                return Array.Empty<ScriptItem>();
+            }
+
+            var result = new List<ScriptItem>();
+
+            foreach (JToken item in scripts)
+            {
+                ScriptItem script = new ScriptItem
+                {
+                    Id = GetString(
+                        item,
+                        "id",
+                        "_id",
+                        "scriptId"
+                    ),
+
+                    Title = GetString(
+                        item,
+                        "title",
+                        "name",
+                        "scriptName"
+                    ),
+
+                    Description = GetString(
+                        item,
+                        "description",
+                        "desc"
+                    ),
+
+                    Author = GetString(
+                        item,
+                        "author",
+                        "creator",
+                        "username"
+                    ),
+
+                    Game = GetGameName(item),
+
+                    Script = GetString(
+                        item,
+                        "script",
+                        "source",
+                        "code",
+                        "lua"
+                    ),
+
+                    ThumbnailUrl = GetStringOrNull(
+                        item,
+                        "thumbnail",
+                        "thumbnailUrl",
+                        "image"
+                    ),
+
+                    SourceUrl = GetStringOrNull(
+                        item,
+                        "url",
+                        "sourceUrl",
+                        "rawScript"
+                    ),
+
+                    Provider = "RScript",
+
+                    Views = GetInt(
+                        item,
+                        "views",
+                        "viewCount"
+                    )
+                };
+
+                if (string.IsNullOrWhiteSpace(script.Title))
+                {
+                    script.Title = "Untitled Script";
+                }
+
+                result.Add(script);
+            }
+
+            return result;
+        }
+        catch
         {
             return Array.Empty<ScriptItem>();
         }
-
-        var result = new List<ScriptItem>();
-
-        foreach (JToken item in scripts)
-        {
-            ScriptItem script = new ScriptItem
-            {
-                Id = GetString(
-                    item,
-                    "id",
-                    "_id",
-                    "scriptId"
-                ),
-
-                Title = GetString(
-                    item,
-                    "title",
-                    "name",
-                    "scriptName"
-                ),
-
-                Description = GetString(
-                    item,
-                    "description",
-                    "desc"
-                ),
-
-                Author = GetString(
-                    item,
-                    "author",
-                    "creator",
-                    "username"
-                ),
-
-                Game = GetGameName(item),
-
-                Script = GetString(
-                    item,
-                    "script",
-                    "source",
-                    "code",
-                    "lua"
-                ),
-
-                ThumbnailUrl = GetStringOrNull(
-                    item,
-                    "thumbnail",
-                    "thumbnailUrl",
-                    "image"
-                ),
-
-                SourceUrl = GetStringOrNull(
-                    item,
-                    "url",
-                    "sourceUrl",
-                    "rawScript"
-                ),
-
-                Provider = "RScript",
-
-                Views = GetInt(
-                    item,
-                    "views",
-                    "viewCount"
-                )
-            };
-
-            if (string.IsNullOrWhiteSpace(script.Title))
-            {
-                script.Title = "Untitled Script";
-            }
-
-            result.Add(script);
-        }
-
-        return result;
     }
 
 
