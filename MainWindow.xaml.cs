@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -8,6 +8,7 @@ using System.Xml;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using Hermes_Executor.Core;
+using Hermes_Executor.Models;
 using Hermes_Executor.Views;
 using Microsoft.Win32;
 
@@ -17,6 +18,7 @@ namespace Hermes_Executor
     {
         private readonly Injector _injector;
         private readonly ScriptEngine _scriptEngine;
+        private readonly DispatcherTimer _robloxCheckTimer;
 
         public MainWindow()
         {
@@ -34,8 +36,72 @@ namespace Hermes_Executor
             // Wire up console commands
             ConsoleViewPanel.OnCommandSubmitted += ProcessConsoleCommand;
 
+            // Wire up Script Hub events
+            ScriptHubViewControl.OpenInNewTabRequested += ScriptHub_OpenInNewTab;
+            ScriptHubViewControl.ExecuteRequested += ScriptHub_ExecuteRequested;
+
+            _robloxCheckTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(2)
+            };
+            _robloxCheckTimer.Tick += RobloxCheckTimer_Tick;
+            _robloxCheckTimer.Start();
+
             AddConsoleMessage("Hermes Executor v1.0 initialized with Auto-Attach engine.");
             AddConsoleMessage("Type 'help' in console for available commands.");
+        }
+
+        private void ScriptHubButton_Click(object sender, RoutedEventArgs e)
+        {
+            EditorContainer.Visibility = Visibility.Collapsed;
+            ScriptHubContainer.Visibility = Visibility.Visible;
+        }
+
+        private void EditorButton_Click(object sender, RoutedEventArgs e)
+        {
+            ScriptHubContainer.Visibility = Visibility.Collapsed;
+            EditorContainer.Visibility = Visibility.Visible;
+        }
+
+        private void ScriptHub_OpenInNewTab(ScriptItem script)
+        {
+            if (string.IsNullOrWhiteSpace(script.Script))
+            {
+                MessageBox.Show(
+                    "Source script tidak tersedia pada hasil ini.",
+                    "Hermes Script Hub",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            ScriptEditorView.SetScriptText(script.Script);
+            ScriptHubContainer.Visibility = Visibility.Collapsed;
+            EditorContainer.Visibility = Visibility.Visible;
+            AddConsoleMessage($"Loaded script from Script Hub: {script.Title}");
+        }
+
+        private async void ScriptHub_ExecuteRequested(ScriptItem script)
+        {
+            if (string.IsNullOrWhiteSpace(script.Script))
+            {
+                MessageBox.Show(
+                    "Source script tidak tersedia pada hasil ini.",
+                    "Hermes Script Hub",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                await _scriptEngine.ExecuteAsync(script.Script);
+                AddConsoleMessage($"Executed script from Script Hub: {script.Title}");
+            }
+            catch (Exception ex)
+            {
+                AddConsoleMessage($"Execute failed: {ex.Message}");
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -133,7 +199,7 @@ namespace Hermes_Executor
                     AddConsoleMessage("Available commands: help, status, clear");
                     break;
                 case "status":
-                    AddConsoleMessage("Hermes-Executor running normally with Auto-Attach active.");
+                    AddConsoleMessage($"Hermes-Executor running normally with Roblox Online: {_injector.CheckRobloxRunning()}.");
                     break;
                 case "clear":
                     ConsoleViewPanel.Clear();
@@ -143,6 +209,7 @@ namespace Hermes_Executor
                     break;
             }
         }
+
         private void RobloxCheckTimer_Tick(object? sender, EventArgs e)
         {
             bool isRunning = _injector.CheckRobloxRunning();
