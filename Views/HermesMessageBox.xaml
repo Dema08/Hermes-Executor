@@ -108,6 +108,23 @@
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
+                <Button x:Name="BtnCancel" Content="CANCEL" Width="85" Height="32" Margin="8,0,0,0" Background="#262626" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold" FontSize="13" Cursor="Hand" Click="BtnCancel_Click" Visibility="Collapsed">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="CancelBorder" Background="{TemplateBinding Background}" CornerRadius="8">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="CancelBorder" Property="Background" Value="#333333"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="CancelBorder" Property="Background" Value="#1F1F1F"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
             </StackPanel>
         </Grid>
     </Border>

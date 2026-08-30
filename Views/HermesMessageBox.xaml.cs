@@ -14,7 +14,15 @@ namespace Hermes_Executor.Views
             Info
         }
 
+        public enum MessageBoxResult3Way
+        {
+            Save,
+            DontSave,
+            Cancel
+        }
+
         public bool Result { get; private set; } = false;
+        public MessageBoxResult3Way Result3Way { get; private set; } = MessageBoxResult3Way.Cancel;
 
         public HermesMessageBox(string title, string message, NotificationType type = NotificationType.Success, bool isConfirm = false)
         {
@@ -49,7 +57,7 @@ namespace Hermes_Executor.Views
             MouseLeftButtonDown += (s, e) => { if (e.ButtonState == MouseButtonState.Pressed) DragMove(); };
             
             // Allow ESC key to close
-            KeyDown += (s, e) => { if (e.Key == Key.Escape) { Result = false; CloseWithAnimation(); } };
+            KeyDown += (s, e) => { if (e.Key == Key.Escape) { Result3Way = MessageBoxResult3Way.Cancel; Result = false; CloseWithAnimation(); } };
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -74,6 +82,10 @@ namespace Hermes_Executor.Views
 
         private void BtnYes_Click(object sender, RoutedEventArgs e)
         {
+            if (BtnYes.Content.ToString() == "Save")
+            {
+                Result3Way = MessageBoxResult3Way.Save;
+            }
             Result = true;
             DialogResult = true;
             CloseWithAnimation();
@@ -81,13 +93,26 @@ namespace Hermes_Executor.Views
 
         private void BtnNo_Click(object sender, RoutedEventArgs e)
         {
+            if (BtnNo.Content.ToString() == "Don't Save")
+            {
+                Result3Way = MessageBoxResult3Way.DontSave;
+            }
             Result = false;
             DialogResult = false;
             CloseWithAnimation();
         }
 
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            Result3Way = MessageBoxResult3Way.Cancel;
+            Result = false;
+            DialogResult = null;
+            CloseWithAnimation();
+        }
+
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
+            Result3Way = MessageBoxResult3Way.Cancel;
             Result = false;
             CloseWithAnimation();
         }
@@ -97,6 +122,19 @@ namespace Hermes_Executor.Views
             var msgBox = new HermesMessageBox(title, message, type, isConfirm);
             msgBox.ShowDialog();
             return msgBox.Result;
+        }
+
+        public static MessageBoxResult3Way ShowUnsavedChanges(string title, string message)
+        {
+            var msgBox = new HermesMessageBox(title, message, NotificationType.Warning);
+            msgBox.BtnYes.Content = "Save";
+            msgBox.BtnNo.Content = "Don't Save";
+            msgBox.BtnNo.Visibility = Visibility.Visible;
+            msgBox.BtnCancel.Visibility = Visibility.Visible;
+            msgBox.Result3Way = MessageBoxResult3Way.Cancel;
+
+            msgBox.ShowDialog();
+            return msgBox.Result3Way;
         }
     }
 }

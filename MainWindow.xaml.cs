@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -32,6 +32,7 @@ namespace Hermes_Executor
 
             // Wire up execute button from ScriptEditor view
             ScriptEditorView.BtnExecute.Click += Execute_Click;
+            ScriptEditorView.ScriptSaved += (filePath) => AddConsoleMessage($"Saved script to {filePath}");
 
             // Wire up console commands
             ConsoleViewPanel.OnCommandSubmitted += ProcessConsoleCommand;
@@ -46,6 +47,8 @@ namespace Hermes_Executor
             };
             _robloxCheckTimer.Tick += RobloxCheckTimer_Tick;
             _robloxCheckTimer.Start();
+
+            Closing += MainWindow_Closing;
 
             AddConsoleMessage("Hermes Executor v1.0 initialized with Auto-Attach engine.");
             AddConsoleMessage("Type 'help' in console for available commands.");
@@ -75,7 +78,7 @@ namespace Hermes_Executor
                 return;
             }
 
-            ScriptEditorView.SetScriptText(script.Script);
+            ScriptEditorView.OpenNewTab(script.Title, script.Script);
             ScriptHubContainer.Visibility = Visibility.Collapsed;
             EditorContainer.Visibility = Visibility.Visible;
             AddConsoleMessage($"Loaded script from Script Hub: {script.Title}");
@@ -153,21 +156,23 @@ namespace Hermes_Executor
             };
             if (dlg.ShowDialog() == true)
             {
-                ScriptEditorView.SetScriptText(File.ReadAllText(dlg.FileName));
-                AddConsoleMessage($"Loaded script from {dlg.FileName}");
+                try
+                {
+                    ScriptEditorView.OpenNewTab(Path.GetFileName(dlg.FileName), File.ReadAllText(dlg.FileName), dlg.FileName);
+                    AddConsoleMessage($"Loaded script from {dlg.FileName}");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Gagal membuka file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
         private void SaveScript_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog dlg = new SaveFileDialog
+            if (ScriptEditorView.ActiveTab != null)
             {
-                Filter = "Lua Files (*.lua)|*.lua|Text Files (*.txt)|*.txt|All Files (*.*)|*.*"
-            };
-            if (dlg.ShowDialog() == true)
-            {
-                File.WriteAllText(dlg.FileName, ScriptEditorView.GetScriptText());
-                AddConsoleMessage($"Saved script to {dlg.FileName}");
+                ScriptEditorView.SaveTab(ScriptEditorView.ActiveTab, false);
             }
         }
 
@@ -225,6 +230,48 @@ namespace Hermes_Executor
             }
         }
 
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                switch (e.Key)
+                {
+                    case Key.N:
+                        e.Handled = true;
+                        ScriptEditorView.AddNewTab();
+                        break;
+                    case Key.W:
+                        e.Handled = true;
+                        if (ScriptEditorView.ActiveTab != null)
+                        {
+                            ScriptEditorView.PromptAndCloseTab(ScriptEditorView.ActiveTab);
+                        }
+                        break;
+                    case Key.S:
+                        e.Handled = true;
+                        if (ScriptEditorView.ActiveTab != null)
+                        {
+                            ScriptEditorView.SaveTab(ScriptEditorView.ActiveTab, false);
+                        }
+                        break;
+                }
+            }
+            else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+                if (e.Key == Key.S)
+                {
+                    e.Handled = true;
+                    if (ScriptEditorView.ActiveTab != null)
+                    {
+                        ScriptEditorView.SaveTab(ScriptEditorView.ActiveTab, true);
+                    }
+                }
+            }
+        }
 
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ScriptEditorView.SaveSessionImmediate();
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Hermes_Executor.Views.ScriptEditor"
+<UserControl x:Class="Hermes_Executor.Views.ScriptEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,6 +6,96 @@
              xmlns:avalondit="http://icsharpcode.net/sharpdevelop/avalonedit"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <!-- TabItem Style -->
+        <Style TargetType="TabItem">
+            <Setter Property="Background" Value="#1C1D21"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="0,0,2,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{DynamicResource HermesGold}" 
+                                BorderThickness="0" 
+                                CornerRadius="4,4,0,0"
+                                Padding="10,5">
+                            <ContentPresenter x:Name="ContentSite"
+                                              ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#121316"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="0,0,0,2"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Background" Value="#18191D"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                <Setter Property="Background" Value="#222328"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- TabControl Style -->
+        <Style TargetType="TabControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Tab Headers panel + plus button -->
+                            <Grid Grid.Row="0" Background="#18191D" Margin="0,0,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" BorderThickness="0" Focusable="False">
+                                    <TabPanel x:Name="HeaderPanel" IsItemsHost="True" KeyboardNavigation.TabIndex="1" VerticalAlignment="Center"/>
+                                </ScrollViewer>
+                                
+                                <Button Grid.Column="1" Content="＋" Width="24" Height="24" Margin="5,0,5,0" ToolTip="New File (Ctrl+N)" Click="NewTab_Click" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="#2A2B30"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource HermesGold}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                            
+                            <!-- Tab content -->
+                            <Border Grid.Row="1" Background="{TemplateBinding Background}" BorderThickness="0">
+                                <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Background="{DynamicResource BackgroundDark}">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -49,12 +139,62 @@
             </StackPanel>
         </Grid>
 
-        <avalondit:TextEditor Grid.Row="1" x:Name="EditorControl"
-                              Background="#121316" Foreground="#D4D4D4"
-                              LineNumbersForeground="#6E7681"
-                              FontFamily="Consolas" FontSize="13"
-                              ShowLineNumbers="True"
-                              Margin="10,0"/>
+        <TabControl Grid.Row="1" x:Name="Tabs" Background="Transparent" BorderThickness="0" Margin="10,0" SelectionChanged="Tabs_SelectionChanged">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="0" Height="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="{Binding Header}" Foreground="{DynamicResource TextPrimary}" FontWeight="Normal" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="*" Foreground="{DynamicResource HermesGold}" FontWeight="Bold" Margin="0,0,4,0" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsModified}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            
+                            <Button Content="✕" Width="14" Height="14" FontSize="8" FontWeight="Bold" Background="Transparent" Foreground="{DynamicResource TextSecondary}" BorderThickness="0" Cursor="Hand" Click="CloseTabButton_Click" VerticalAlignment="Center">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="2">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="border" Property="Background" Value="#FF4444"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <ContentControl Content="{Binding Editor}"/>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
 
         <StatusBar Grid.Row="2" Background="Transparent" Foreground="{DynamicResource TextSecondary}">
             <StatusBarItem>
