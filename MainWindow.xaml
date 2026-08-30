@@ -7,6 +7,7 @@
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
         Title="Hermes Executor v1.0" Height="768" Width="1024"
+        Icon="pack://application:,,,/Controls/Resource/hermes_icon.ico"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip"
         MinHeight="600" MinWidth="800" MouseLeftButtonDown="Window_MouseLeftButtonDown">
@@ -133,6 +134,7 @@
                             <Button Content="💾 Save Script" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="SaveScript_Click"/>
                             <Button Content="📋 From Clipboard" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="ClipboardScript_Click"/>
                             <Button Content="🗑️ Clear Script" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="ClearScript_Click"/>
+                            <Button Content="✨ Loading Screen" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="ShowSplash_Click"/>
                         </StackPanel>
 
                         <!-- Script Library TreeView -->
@@ -183,9 +185,10 @@
 
                     <!-- AvalonEdit Editor -->
                     <avalondit:TextEditor Grid.Row="1" x:Name="ScriptEditorControl"
-                                          Background="#1E1E1E" Foreground="{DynamicResource TextPrimary}"
+                                          Background="#121316" Foreground="#D4D4D4"
+                                          LineNumbersForeground="#6E7681"
                                           FontFamily="Consolas" FontSize="13"
-                                          ShowLineNumbers="True" SyntaxHighlighting="Lua"
+                                          ShowLineNumbers="True"
                                           Margin="10,0"/>
 
                     <!-- Editor Status -->

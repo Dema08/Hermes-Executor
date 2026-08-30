@@ -8,13 +8,13 @@ C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\
 Hermes_Executor
 none
 false
-TRACE;DEBUG;NET;NET9_0;NETCOREAPP
+TRACE;DEBUG;NET;NET9_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\laragon\www\Hermes-Executor\App.xaml
-6-2070889408
+7803065203
 
-7-2006605117
-215-912618575
-Controls\StatusIndicator.xaml;MainWindow.xaml;Styles\DarkTheme.xaml;Styles\HermesTheme.xaml;Views\ConsoleView.xaml;Views\ScriptEditor.xaml;
+91977165482
+215-1577880471
+Controls\StatusIndicator.xaml;MainWindow.xaml;Styles\DarkTheme.xaml;Styles\HermesTheme.xaml;Views\ConsoleView.xaml;Views\ScriptEditor.xaml;Views\SplashScreenWindow.xaml;
 
 False
 

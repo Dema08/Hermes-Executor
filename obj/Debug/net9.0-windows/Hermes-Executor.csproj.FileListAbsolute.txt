@@ -166,3 +166,7 @@ C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Views\ScriptEditor.baml
 C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Controls\StatusIndicator.g.cs
 C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Views\ConsoleView.g.cs
 C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Views\ScriptEditor.g.cs
+C:\laragon\www\Hermes-Executor\bin\Debug\net9.0-windows\fil-PH\ModernWpf.Controls.resources.dll
+C:\laragon\www\Hermes-Executor\bin\Debug\net9.0-windows\fil-PH\ModernWpf.resources.dll
+C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Views\SplashScreenWindow.baml
+C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Views\SplashScreenWindow.g.cs

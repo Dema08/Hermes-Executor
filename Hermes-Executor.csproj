@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>Hermes_Executor</RootNamespace>
-    <!-- <ApplicationIcon>Resources\Hermes.ico</ApplicationIcon> -->
+    <ApplicationIcon>Controls\Resource\hermes_icon.ico</ApplicationIcon>
     <AssemblyTitle>Hermes Executor</AssemblyTitle>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
@@ -22,9 +22,9 @@
     <PackageReference Include="FontAwesome.Sharp" Version="6.3.0" />
   </ItemGroup>
 
-  <!-- <ItemGroup>
-    <None Update="Resources\Hermes.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup> -->
+  <ItemGroup>
+    <Resource Include="Controls\Resource\hermes_loadingscreen.jpg" />
+    <Resource Include="Controls\Resource\hermes_icon.ico" />
+    <EmbeddedResource Include="Controls\Resource\LuaVSCode.xshd" />
+  </ItemGroup>
 </Project>

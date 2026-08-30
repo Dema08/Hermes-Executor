@@ -1,10 +1,14 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Xml;
 using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using Hermes_Executor.Core;
+using Hermes_Executor.Views;
 using Microsoft.Win32;
 
 namespace Hermes_Executor
@@ -34,6 +38,9 @@ namespace Hermes_Executor
             _robloxCheckTimer.Tick += RobloxCheckTimer_Tick;
             _robloxCheckTimer.Start();
 
+            // Load VS Code-style Lua syntax highlighting
+            LoadLuaHighlighting();
+
             // Setup AvalonEdit sample text
             ScriptEditorControl.Text = "-- Welcome to Hermes Executor\nprint(\"Hello, Hermes!\")";
             
@@ -42,6 +49,18 @@ namespace Hermes_Executor
 
             AddConsoleMessage("Hermes Executor v1.0 initialized.");
             AddConsoleMessage("Type 'help' in console for available commands.");
+        }
+
+        private void LoadLuaHighlighting()
+        {
+            try
+            {
+                ScriptEditorControl.TextArea.TextView.LineTransformers.Add(new LuaColorizer());
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lua Highlighting Error: {ex.Message}");
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -223,6 +242,12 @@ namespace Hermes_Executor
         {
             var caret = ScriptEditorControl.TextArea.Caret;
             TxtEditorStatus.Text = $"Ln: {caret.Line} | Col: {caret.Column}";
+        }
+
+        private void ShowSplash_Click(object sender, RoutedEventArgs e)
+        {
+            SplashScreenWindow splash = new SplashScreenWindow();
+            splash.Show();
         }
     }
 }

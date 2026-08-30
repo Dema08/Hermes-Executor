@@ -172,6 +172,12 @@
           "lib/net5.0-windows7.0/fi-FI/ModernWpf.resources.dll": {
             "locale": "fi-FI"
           },
+          "lib/net5.0-windows7.0/fil-PH/ModernWpf.Controls.resources.dll": {
+            "locale": "fil-PH"
+          },
+          "lib/net5.0-windows7.0/fil-PH/ModernWpf.resources.dll": {
+            "locale": "fil-PH"
+          },
           "lib/net5.0-windows7.0/fr-CA/ModernWpf.Controls.resources.dll": {
             "locale": "fr-CA"
           },
@@ -1104,8 +1110,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Dema Adzhani\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Hafizh\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
@@ -1113,15 +1118,11 @@
       "projectUniqueName": "C:\\laragon\\www\\Hermes-Executor\\Hermes-Executor.csproj",
       "projectName": "Hermes-Executor",
       "projectPath": "C:\\laragon\\www\\Hermes-Executor\\Hermes-Executor.csproj",
-      "packagesPath": "C:\\Users\\Dema Adzhani\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\Hafizh\\.nuget\\packages\\",
       "outputPath": "C:\\laragon\\www\\Hermes-Executor\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Dema Adzhani\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+        "C:\\Users\\Hafizh\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0-windows"
@@ -1145,7 +1146,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.100"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0-windows7.0": {
@@ -1187,7 +1188,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.317/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

@@ -1,0 +1,224 @@
+<Window x:Class="Hermes_Executor.Views.SplashScreenWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Hermes Executor - Loading" Height="420" Width="680"
+        Icon="pack://application:,,,/Controls/Resource/hermes_icon.ico"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        WindowStartupLocation="CenterScreen" ShowInTaskbar="True">
+
+    <Window.Resources>
+        <!-- Breathing Logo Animation -->
+        <Storyboard x:Key="LogoPulseStoryboard" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetName="LogoScaleTransform"
+                             Storyboard.TargetProperty="ScaleX"
+                             From="1.0" To="1.05" Duration="0:0:1.8">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="LogoScaleTransform"
+                             Storyboard.TargetProperty="ScaleY"
+                             From="1.0" To="1.05" Duration="0:0:1.8">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="LogoGlow"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0.4" To="0.85" Duration="0:0:1.8">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Continuous Rotating Ring Animation -->
+        <Storyboard x:Key="RingRotateStoryboard" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="RingRotateTransform"
+                             Storyboard.TargetProperty="Angle"
+                             From="0" To="360" Duration="0:0:6"/>
+        </Storyboard>
+
+        <Storyboard x:Key="InnerRingRotateStoryboard" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="InnerRingRotateTransform"
+                             Storyboard.TargetProperty="Angle"
+                             From="360" To="0" Duration="0:0:4"/>
+        </Storyboard>
+
+        <!-- Shimmer Highlight Animation -->
+        <Storyboard x:Key="ShimmerStoryboard" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="ShimmerTransform"
+                             Storyboard.TargetProperty="X"
+                             From="-150" To="600" Duration="0:0:2">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </Window.Resources>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource LogoPulseStoryboard}"/>
+            <BeginStoryboard Storyboard="{StaticResource RingRotateStoryboard}"/>
+            <BeginStoryboard Storyboard="{StaticResource InnerRingRotateStoryboard}"/>
+            <BeginStoryboard Storyboard="{StaticResource ShimmerStoryboard}"/>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <Grid x:Name="RootGrid" Opacity="0">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="RootGrid"
+                                         Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.5"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
+        <!-- Main Card Border with Golden Glow -->
+        <Border Margin="15" Background="{DynamicResource BackgroundDark}" CornerRadius="16" BorderThickness="1.5">
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FFD700" Offset="0.0"/>
+                    <GradientStop Color="#55C0A000" Offset="0.5"/>
+                    <GradientStop Color="#FFD700" Offset="1.0"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <Border.Effect>
+                <DropShadowEffect Color="#FFD700" BlurRadius="25" ShadowDepth="0" Opacity="0.35"/>
+            </Border.Effect>
+
+            <Grid ClipToBounds="True">
+                <!-- Radial Background Aura -->
+                <Ellipse Width="450" Height="450" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                            <GradientStop Color="#25FFD700" Offset="0"/>
+                            <GradientStop Color="#08FFD700" Offset="0.5"/>
+                            <GradientStop Color="#00000000" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+
+                <!-- Grid Overlay Effect -->
+                <Canvas IsHitTestVisible="False" Opacity="0.05">
+                    <Path Data="M 0,0 L 650,0 M 0,50 L 650,50 M 0,100 L 650,100 M 0,150 L 650,150 M 0,200 L 650,200 M 0,250 L 650,250 M 0,300 L 650,300 M 0,350 L 650,350" Stroke="#FFD700" StrokeThickness="0.5"/>
+                </Canvas>
+
+                <!-- Main Layout -->
+                <Grid Margin="30,25">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Center Area: Logo + Animated Energy Rings -->
+                    <Grid Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <!-- Outer Rotating Tech Ring -->
+                        <Ellipse Width="190" Height="190" Stroke="#FFD700" StrokeThickness="1.5" StrokeDashArray="6 4 2 4" Opacity="0.5">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform x:Name="RingRotateTransform" CenterX="95" CenterY="95"/>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+
+                        <!-- Inner Rotating Counter-Ring -->
+                        <Ellipse Width="170" Height="170" Stroke="#FFE44D" StrokeThickness="1" StrokeDashArray="2 8 4 8" Opacity="0.4">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform x:Name="InnerRingRotateTransform" CenterX="85" CenterY="85"/>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+
+                        <!-- Glowing Backdrop for Logo -->
+                        <Ellipse x:Name="LogoGlow" Width="140" Height="140" Fill="#20FFD700" Opacity="0.5">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="20"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+
+                        <!-- Hermes Logo Circular Emblem -->
+                        <Ellipse Width="150" Height="150" Stroke="{DynamicResource HermesGold}" StrokeThickness="2.5">
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="#FFD700" BlurRadius="20" ShadowDepth="0" Opacity="0.75"/>
+                            </Ellipse.Effect>
+                            <Ellipse.RenderTransform>
+                                <ScaleTransform x:Name="LogoScaleTransform" CenterX="75" CenterY="75"/>
+                            </Ellipse.RenderTransform>
+                            <Ellipse.Fill>
+                                <ImageBrush ImageSource="pack://application:,,,/Controls/Resource/hermes_loadingscreen.jpg" 
+                                            Stretch="UniformToFill" 
+                                            Viewbox="0.15, 0.0, 0.7, 0.58" 
+                                            ViewboxUnits="RelativeToBoundingBox"/>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </Grid>
+
+                    <!-- App Title Section -->
+                    <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,15,0,20">
+                        <TextBlock Text="HERMES EXECUTOR" Foreground="{DynamicResource HermesGold}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#FFD700" BlurRadius="10" ShadowDepth="0" Opacity="0.5"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        <TextBlock Text="NEXT-GEN ROBLOX EXECUTION ENGINE" Foreground="{DynamicResource TextSecondary}" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.8"/>
+                    </StackPanel>
+
+                    <!-- Bottom Section: Loading Status, Progress Bar, Percentage -->
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Status Label & Percentage -->
+                        <Grid Grid.Row="0" Margin="5,0,5,8">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <TextBlock Text="✦ " Foreground="{DynamicResource HermesGold}" FontSize="12" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="TxtLoadingStatus" Text="Initializing Hermes Core..." Foreground="{DynamicResource TextPrimary}" FontSize="12" FontFamily="Segoe UI" FontWeight="Medium"/>
+                            </StackPanel>
+                            
+                            <TextBlock x:Name="TxtPercentage" Text="0%" Foreground="{DynamicResource HermesGold}" FontSize="13" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- Modern Animated Progress Bar Track -->
+                        <Border Grid.Row="1" Height="8" Background="#141414" CornerRadius="4" BorderBrush="#333333" BorderThickness="1" ClipToBounds="True">
+                            <Grid x:Name="ProgressBarTrack">
+                                <!-- Progress Bar Fill -->
+                                <Border x:Name="ProgressBarFill" HorizontalAlignment="Left" Width="0" CornerRadius="4">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#C0A000" Offset="0.0"/>
+                                            <GradientStop Color="#FFD700" Offset="0.6"/>
+                                            <GradientStop Color="#FFE44D" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+
+                                <!-- Shimmer Overlay -->
+                                <Rectangle Width="120" Height="8" HorizontalAlignment="Left" IsHitTestVisible="False">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#00FFFFFF" Offset="0.0"/>
+                                            <GradientStop Color="#66FFFFFF" Offset="0.5"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                    <Rectangle.RenderTransform>
+                                        <TranslateTransform x:Name="ShimmerTransform" X="-150"/>
+                                    </Rectangle.RenderTransform>
+                                </Rectangle>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

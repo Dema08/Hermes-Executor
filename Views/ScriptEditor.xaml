@@ -31,9 +31,10 @@
         </Grid>
 
         <avalondit:TextEditor Grid.Row="1" x:Name="EditorControl"
-                              Background="#1E1E1E" Foreground="{DynamicResource TextPrimary}"
+                              Background="#121316" Foreground="#D4D4D4"
+                              LineNumbersForeground="#6E7681"
                               FontFamily="Consolas" FontSize="13"
-                              ShowLineNumbers="True" SyntaxHighlighting="Lua"
+                              ShowLineNumbers="True"
                               Margin="10,0"/>
 
         <StatusBar Grid.Row="2" Background="Transparent" Foreground="{DynamicResource TextSecondary}">

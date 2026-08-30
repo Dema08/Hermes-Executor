@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="LuaVSCode" extensions=".lua" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  <!-- Madium / VS Code Vibrant Theme Colors -->
+  <Color name="Comment"        foreground="#6A9955" fontStyle="italic"/>
+  <Color name="String"         foreground="#E06C75"/>
+  <Color name="Escape"         foreground="#D7BA7D"/>
+  <Color name="Number"         foreground="#B5CEA8"/>
+  <Color name="Keyword"        foreground="#E5C07B" fontWeight="bold"/>
+  <Color name="FunctionCall"   foreground="#61AFEF" fontWeight="bold"/>
+  <Color name="GlobalFunction" foreground="#DCDCAA" fontWeight="bold"/>
+  <Color name="RobloxGlobal"   foreground="#4EC9B0" fontWeight="bold"/>
+  <Color name="BuiltinLib"     foreground="#9CDCFE"/>
+  <Color name="Boolean"        foreground="#569CD6" fontWeight="bold"/>
+  <Color name="Nil"            foreground="#569CD6" fontWeight="bold"/>
+  <Color name="Operator"       foreground="#D4D4D4"/>
+  <Color name="Punctuation"    foreground="#D4D4D4"/>
+
+  <RuleSet>
+
+    <!-- Multi-line comments: --[[ ... ]] -->
+    <Span color="Comment" multiline="true">
+      <Begin>--\[=*\[</Begin>
+      <End>\]=*\]</End>
+    </Span>
+
+    <!-- Single-line comment: -- ... -->
+    <Span color="Comment">
+      <Begin>--</Begin>
+      <End>$</End>
+    </Span>
+
+    <!-- Multi-line strings: [[ ... ]] -->
+    <Span color="String" multiline="true">
+      <Begin>\[=*\[</Begin>
+      <End>\]=*\]</End>
+    </Span>
+
+    <!-- Double-quoted string -->
+    <Span color="String">
+      <Begin>"</Begin>
+      <End>"</End>
+      <RuleSet>
+        <Rule color="Escape">\\.</Rule>
+      </RuleSet>
+    </Span>
+
+    <!-- Single-quoted string -->
+    <Span color="String">
+      <Begin>'</Begin>
+      <End>'</End>
+      <RuleSet>
+        <Rule color="Escape">\\.</Rule>
+      </RuleSet>
+    </Span>
+
+    <!-- Hex numbers -->
+    <Rule color="Number">\b0[xX][0-9a-fA-F]+\b</Rule>
+
+    <!-- Numbers -->
+    <Rule color="Number">(\b\d+(\.\d*)?|\.\d+)([eE][+\-]?\d+)?\b</Rule>
+
+    <!-- Function calls: e.g. greet(...), input(...), print(...) -->
+    <Rule color="FunctionCall">\b[a-zA-Z_][a-zA-Z0-9_]*(?=\s*\()</Rule>
+
+    <!-- Boolean literals -->
+    <Keywords color="Boolean">
+      <Word>true</Word>
+      <Word>false</Word>
+    </Keywords>
+
+    <!-- Nil literal -->
+    <Keywords color="Nil">
+      <Word>nil</Word>
+    </Keywords>
+
+    <!-- Lua keywords -->
+    <Keywords color="Keyword">
+      <Word>and</Word>
+      <Word>break</Word>
+      <Word>do</Word>
+      <Word>else</Word>
+      <Word>elseif</Word>
+      <Word>end</Word>
+      <Word>for</Word>
+      <Word>function</Word>
+      <Word>goto</Word>
+      <Word>if</Word>
+      <Word>in</Word>
+      <Word>local</Word>
+      <Word>not</Word>
+      <Word>or</Word>
+      <Word>repeat</Word>
+      <Word>return</Word>
+      <Word>then</Word>
+      <Word>until</Word>
+      <Word>while</Word>
+    </Keywords>
+
+    <!-- Standard Lua global functions -->
+    <Keywords color="GlobalFunction">
+      <Word>assert</Word>
+      <Word>collectgarbage</Word>
+      <Word>dofile</Word>
+      <Word>error</Word>
+      <Word>getmetatable</Word>
+      <Word>ipairs</Word>
+      <Word>load</Word>
+      <Word>loadfile</Word>
+      <Word>loadstring</Word>
+      <Word>next</Word>
+      <Word>pairs</Word>
+      <Word>pcall</Word>
+      <Word>print</Word>
+      <Word>rawequal</Word>
+      <Word>rawget</Word>
+      <Word>rawlen</Word>
+      <Word>rawset</Word>
+      <Word>require</Word>
+      <Word>select</Word>
+      <Word>setmetatable</Word>
+      <Word>tonumber</Word>
+      <Word>tostring</Word>
+      <Word>type</Word>
+      <Word>unpack</Word>
+      <Word>warn</Word>
+      <Word>xpcall</Word>
+    </Keywords>
+
+    <!-- Roblox-specific globals -->
+    <Keywords color="RobloxGlobal">
+      <Word>game</Word>
+      <Word>workspace</Word>
+      <Word>script</Word>
+      <Word>plugin</Word>
+      <Word>wait</Word>
+      <Word>delay</Word>
+      <Word>spawn</Word>
+      <Word>tick</Word>
+      <Word>time</Word>
+      <Word>task</Word>
+      <Word>Instance</Word>
+      <Word>Enum</Word>
+      <Word>Vector2</Word>
+      <Word>Vector3</Word>
+      <Word>CFrame</Word>
+      <Word>Color3</Word>
+      <Word>UDim</Word>
+      <Word>UDim2</Word>
+      <Word>TweenInfo</Word>
+      <Word>BrickColor</Word>
+      <Word>Ray</Word>
+      <Word>Region3</Word>
+      <Word>NumberSequence</Word>
+      <Word>ColorSequence</Word>
+      <Word>NumberRange</Word>
+      <Word>Rect</Word>
+      <Word>PhysicalProperties</Word>
+      <Word>getfenv</Word>
+      <Word>setfenv</Word>
+      <Word>getrenv</Word>
+      <Word>getgenv</Word>
+      <Word>getrawmetatable</Word>
+      <Word>setrawmetatable</Word>
+      <Word>hookfunction</Word>
+      <Word>newcclosure</Word>
+      <Word>syn</Word>
+      <Word>Drawing</Word>
+    </Keywords>
+
+    <!-- Standard library tables -->
+    <Keywords color="BuiltinLib">
+      <Word>string</Word>
+      <Word>table</Word>
+      <Word>math</Word>
+      <Word>io</Word>
+      <Word>os</Word>
+      <Word>coroutine</Word>
+      <Word>debug</Word>
+      <Word>utf8</Word>
+      <Word>bit</Word>
+      <Word>bit32</Word>
+      <Word>_G</Word>
+      <Word>_ENV</Word>
+      <Word>_VERSION</Word>
+      <Word>self</Word>
+    </Keywords>
+
+    <!-- Operators -->
+    <Rule color="Operator">[+\-*/%^#&amp;|~&lt;&gt;=~.]|\.\.|\.\.\.|==|~=|&lt;=|&gt;=|&lt;&lt;|&gt;&gt;</Rule>
+
+  </RuleSet>
+</SyntaxDefinition>
