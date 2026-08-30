@@ -55,16 +55,29 @@ public class MockScriptProvider : IScriptProvider
         string query,
         CancellationToken cancellationToken = default)
     {
-        IReadOnlyList<ScriptItem> result = _scripts
-            .Where(script =>
-                script.Title.Contains(
-                    query,
-                    StringComparison.OrdinalIgnoreCase)
-                ||
-                script.Game.Contains(
-                    query,
-                    StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        IReadOnlyList<ScriptItem> result;
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            result = _scripts.ToList();
+        }
+        else
+        {
+            result = _scripts
+                .Where(script =>
+                    script.Title.Contains(
+                        query,
+                        StringComparison.OrdinalIgnoreCase)
+                    ||
+                    script.Game.Contains(
+                        query,
+                        StringComparison.OrdinalIgnoreCase)
+                    ||
+                    script.Description.Contains(
+                        query,
+                        StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
 
         return Task.FromResult(result);
     }

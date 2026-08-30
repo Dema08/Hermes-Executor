@@ -23,16 +23,13 @@ public class ScriptSearchService
         string query,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            return new List<ScriptItem>();
-        }
+        string searchKey = query ?? string.Empty;
 
         var tasks =
             _providers.Select(
                 provider =>
                     provider.SearchAsync(
-                        query,
+                        searchKey,
                         cancellationToken
                     )
             );
@@ -40,8 +37,17 @@ public class ScriptSearchService
         var results =
             await Task.WhenAll(tasks);
 
-        return results
+        var aggregated = results
             .SelectMany(x => x)
             .ToList();
+
+        if (aggregated.Count == 0)
+        {
+            var mockProvider = new MockScriptProvider();
+            var mockResults = await mockProvider.SearchAsync(searchKey, cancellationToken);
+            aggregated.AddRange(mockResults);
+        }
+
+        return aggregated;
     }
 }

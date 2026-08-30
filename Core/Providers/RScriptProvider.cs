@@ -49,18 +49,14 @@ public class RScriptProvider : IScriptProvider
         string query,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            return Array.Empty<ScriptItem>();
-        }
-
-        string endpointPath =
-            "v1/search" +
-            $"?q={Uri.EscapeDataString(query)}" +
-            "&index=scripts" +
-            "&limit=20" +
-            "&page=1" +
-            "&includeScript=true";
+        string endpointPath = string.IsNullOrWhiteSpace(query)
+            ? "v1/scripts?limit=30&page=1"
+            : "v1/search" +
+              $"?q={Uri.EscapeDataString(query)}" +
+              "&index=scripts" +
+              "&limit=30" +
+              "&page=1" +
+              "&includeScript=true";
 
         HttpResponseMessage? response = null;
         string json = string.Empty;
@@ -158,12 +154,7 @@ public class RScriptProvider : IScriptProvider
                         "desc"
                     ),
 
-                    Author = GetString(
-                        item,
-                        "author",
-                        "creator",
-                        "username"
-                    ),
+                    Author = GetAuthorName(item),
 
                     Game = GetGameName(item),
 
@@ -192,6 +183,15 @@ public class RScriptProvider : IScriptProvider
                         "viewCount"
                     )
                 };
+
+                if (string.IsNullOrWhiteSpace(script.Script))
+                {
+                    string rawScriptUrl = GetString(item, "rawScript", "url", "sourceUrl");
+                    if (!string.IsNullOrWhiteSpace(rawScriptUrl) && rawScriptUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    {
+                        script.Script = $"loadstring(game:HttpGet(\"{rawScriptUrl}\"))()";
+                    }
+                }
 
                 if (string.IsNullOrWhiteSpace(script.Title))
                 {
@@ -234,7 +234,8 @@ public class RScriptProvider : IScriptProvider
             ?? root.SelectToken("results.scripts")
             ?? root.SelectToken("data.results")
             ?? root.SelectToken("scripts")
-            ?? root.SelectToken("results");
+            ?? root.SelectToken("results")
+            ?? root.SelectToken("data");
 
         if (token is JArray array)
         {
@@ -380,5 +381,32 @@ public class RScriptProvider : IScriptProvider
                 );
 
         return property?.Value;
+    }
+
+    private static string GetAuthorName(JToken token)
+    {
+        if (token is not JObject obj) return "Unknown";
+
+        JToken? creator = FindProperty(token, "creator") ?? FindProperty(token, "author");
+        if (creator != null)
+        {
+            if (creator.Type == JTokenType.String)
+            {
+                string str = creator.ToString();
+                if (!string.IsNullOrWhiteSpace(str) && !str.StartsWith("{"))
+                    return str;
+            }
+            if (creator.Type == JTokenType.Object)
+            {
+                string? uname = creator["username"]?.ToString()
+                             ?? creator["name"]?.ToString()
+                             ?? creator["title"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(uname))
+                    return uname;
+            }
+        }
+
+        string fallbackUser = GetString(token, "username", "authorName");
+        return !string.IsNullOrWhiteSpace(fallbackUser) ? fallbackUser : "Unknown";
     }
 }

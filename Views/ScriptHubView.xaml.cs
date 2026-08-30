@@ -85,7 +85,19 @@ namespace Hermes_Executor.Views
                 _searchService = new ScriptSearchService(providers);
             }
 
-            Loaded += (s, e) => TriggerFadeIn();
+            Loaded += (s, e) =>
+            {
+                TriggerFadeIn();
+                if (_originalResults.Count == 0)
+                {
+                    PerformDefaultSearch();
+                }
+            };
+        }
+
+        public void PerformDefaultSearch()
+        {
+            SearchButton_Click(this, new RoutedEventArgs(Button.ClickEvent));
         }
 
         public void TriggerFadeIn()
@@ -100,9 +112,6 @@ namespace Hermes_Executor.Views
         {
             if (_searchService == null) return;
             string query = SearchBox.Text.Trim();
-
-            if (string.IsNullOrWhiteSpace(query))
-                return;
 
             try
             {
@@ -121,7 +130,9 @@ namespace Hermes_Executor.Views
 
                 if (results.Count == 0)
                 {
-                    EmptyStateText.Text = $"Tidak ada script untuk \"{query}\"";
+                    EmptyStateText.Text = string.IsNullOrWhiteSpace(query)
+                        ? "Tidak ada script yang ditemukan."
+                        : $"Tidak ada script untuk \"{query}\"";
                     EmptyState.Visibility = Visibility.Visible;
                 }
                 else
