@@ -1,0 +1,30 @@
+# Build outputs
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.vs
+_ReSharper/
+*.ReSharper
+
+# Temporary files
+*.swp
+*.lock
+*.log
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Python
+__pycache__/
+*.pyc
+
+# Sensitive
+*.key
+*.pem
+*.cert
+*.license
