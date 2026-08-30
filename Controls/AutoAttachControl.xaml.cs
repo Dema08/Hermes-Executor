@@ -26,54 +26,64 @@ namespace Hermes_Executor.Controls
         {
             Dispatcher.Invoke(() =>
             {
+                Brush redBrush = Brushes.Red;
+                Brush orangeBrush = Brushes.Orange;
+                Brush greenBrush = Brushes.Green;
+                Brush limeBrush = Brushes.LimeGreen;
+
+                if (_brushConverter.ConvertFromString("#FF4444") is Brush b1) redBrush = b1;
+                if (_brushConverter.ConvertFromString("#FFAA00") is Brush b2) orangeBrush = b2;
+                if (_brushConverter.ConvertFromString("#00FF00") is Brush b3) greenBrush = b3;
+                if (_brushConverter.ConvertFromString("#00FF44") is Brush b4) limeBrush = b4;
+
                 switch (status)
                 {
                     case AutoInjector.RobloxStatus.Offline:
-                        StatusDot.Fill = (Brush)_brushConverter.ConvertFromString("#FF4444");
+                        StatusDot.Fill = redBrush;
                         StatusText.Text = "OFFLINE";
-                        StatusText.Foreground = (Brush)_brushConverter.ConvertFromString("#FF4444");
+                        StatusText.Foreground = redBrush;
                         StatusDetail.Text = "Roblox tidak terdeteksi";
-                        StatusIndicator.BorderBrush = (Brush)_brushConverter.ConvertFromString("#FF4444");
+                        StatusIndicator.BorderBrush = redBrush;
                         break;
 
                     case AutoInjector.RobloxStatus.Detecting:
-                        StatusDot.Fill = (Brush)_brushConverter.ConvertFromString("#FFAA00");
+                        StatusDot.Fill = orangeBrush;
                         StatusText.Text = "DETECTING";
-                        StatusText.Foreground = (Brush)_brushConverter.ConvertFromString("#FFAA00");
+                        StatusText.Foreground = orangeBrush;
                         StatusDetail.Text = "Mencari Roblox...";
-                        StatusIndicator.BorderBrush = (Brush)_brushConverter.ConvertFromString("#FFAA00");
+                        StatusIndicator.BorderBrush = orangeBrush;
                         break;
 
                     case AutoInjector.RobloxStatus.Online:
-                        StatusDot.Fill = (Brush)_brushConverter.ConvertFromString("#00FF00");
+                        StatusDot.Fill = greenBrush;
                         StatusText.Text = "ONLINE";
-                        StatusText.Foreground = (Brush)_brushConverter.ConvertFromString("#00FF00");
+                        StatusText.Foreground = greenBrush;
                         StatusDetail.Text = "Roblox terdeteksi, siap inject";
-                        StatusIndicator.BorderBrush = (Brush)_brushConverter.ConvertFromString("#00FF00");
+                        StatusIndicator.BorderBrush = greenBrush;
                         break;
 
                     case AutoInjector.RobloxStatus.Injecting:
-                        StatusDot.Fill = (Brush)_brushConverter.ConvertFromString("#FFAA00");
+                        StatusDot.Fill = orangeBrush;
                         StatusText.Text = "INJECTING";
-                        StatusText.Foreground = (Brush)_brushConverter.ConvertFromString("#FFAA00");
+                        StatusText.Foreground = orangeBrush;
                         StatusDetail.Text = "Sedang inject...";
-                        StatusIndicator.BorderBrush = (Brush)_brushConverter.ConvertFromString("#FFAA00");
+                        StatusIndicator.BorderBrush = orangeBrush;
                         break;
 
                     case AutoInjector.RobloxStatus.Injected:
-                        StatusDot.Fill = (Brush)_brushConverter.ConvertFromString("#00FF44");
+                        StatusDot.Fill = limeBrush;
                         StatusText.Text = "INJECTED ✦";
-                        StatusText.Foreground = (Brush)_brushConverter.ConvertFromString("#00FF44");
+                        StatusText.Foreground = limeBrush;
                         StatusDetail.Text = "Hermes aktif!";
-                        StatusIndicator.BorderBrush = (Brush)_brushConverter.ConvertFromString("#00FF44");
+                        StatusIndicator.BorderBrush = limeBrush;
                         break;
 
                     case AutoInjector.RobloxStatus.Failed:
-                        StatusDot.Fill = (Brush)_brushConverter.ConvertFromString("#FF4444");
+                        StatusDot.Fill = redBrush;
                         StatusText.Text = "FAILED";
-                        StatusText.Foreground = (Brush)_brushConverter.ConvertFromString("#FF4444");
+                        StatusText.Foreground = redBrush;
                         StatusDetail.Text = "Inject gagal, coba manual";
-                        StatusIndicator.BorderBrush = (Brush)_brushConverter.ConvertFromString("#FF4444");
+                        StatusIndicator.BorderBrush = redBrush;
                         break;
                 }
 
