@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:avalondit="http://icsharpcode.net/sharpdevelop/avalonedit"
-        xmlns:fa="http://schemas.fontawesome.com/icons/"
+        xmlns:views="clr-namespace:Hermes_Executor.Views"
+        xmlns:controls="clr-namespace:Hermes_Executor.Controls"
         mc:Ignorable="d"
         Title="Hermes Executor v1.0" Height="768" Width="1024"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
@@ -100,7 +100,7 @@
             <!-- MAIN CONTENT AREA (3 COLUMNS) -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="240"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="300"/>
                 </Grid.ColumnDefinitions>
@@ -114,18 +114,10 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Inject Section -->
-                        <StackPanel Grid.Row="0" Margin="10">
-                            <Button x:Name="BtnInject" Content="✦ INJECT" Height="40" Background="{DynamicResource HermesGold}" Foreground="{DynamicResource BackgroundDark}" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="Inject_Click">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </StackPanel>
+                        <!-- Auto-Attach Control -->
+                        <Border Grid.Row="0" Margin="10">
+                            <controls:AutoAttachControl/>
+                        </Border>
 
                         <!-- Menu Items -->
                         <StackPanel Grid.Row="1" Margin="10,0">
@@ -155,74 +147,11 @@
                     </Grid>
                 </Border>
 
-                <!-- SCRIPT EDITOR -->
-                <Grid Grid.Column="1" Background="{DynamicResource BackgroundDark}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="25"/>
-                    </Grid.RowDefinitions>
+                <!-- SCRIPT EDITOR VIEW -->
+                <views:ScriptEditor Grid.Column="1" x:Name="ScriptEditorView"/>
 
-                    <!-- Editor Toolbar -->
-                    <Grid Grid.Row="0" Background="{DynamicResource BackgroundLight}" Margin="10,5">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="📝 Script • LUA" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <Button Content="▶ EXECUTE" Width="90" Height="26" Background="{DynamicResource HermesGold}" Foreground="{DynamicResource BackgroundDark}" FontWeight="Bold" BorderThickness="0" Click="Execute_Click">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="3">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- AvalonEdit Editor -->
-                    <avalondit:TextEditor Grid.Row="1" x:Name="ScriptEditorControl"
-                                          Background="#1E1E1E" Foreground="{DynamicResource TextPrimary}"
-                                          FontFamily="Consolas" FontSize="13"
-                                          ShowLineNumbers="True" SyntaxHighlighting="Lua"
-                                          Margin="10,0"/>
-
-                    <!-- Editor Status -->
-                    <StatusBar Grid.Row="2" Background="Transparent" Foreground="{DynamicResource TextSecondary}">
-                        <StatusBarItem>
-                            <TextBlock x:Name="TxtEditorStatus" Text="Ln: 1 | Col: 1"/>
-                        </StatusBarItem>
-                        <StatusBarItem HorizontalAlignment="Right">
-                            <TextBlock Text="UTF-8 | Lua"/>
-                        </StatusBarItem>
-                    </StatusBar>
-                </Grid>
-
-                <!-- CONSOLE PANEL -->
-                <Border Grid.Column="2" Background="{DynamicResource BackgroundLight}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="40"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Console Header -->
-                        <Grid Grid.Row="0" Margin="10,0">
-                            <TextBlock Text="CONSOLE" Foreground="{DynamicResource HermesGold}" FontWeight="Bold" VerticalAlignment="Center"/>
-                            <Button Content="🗑️" Width="26" Height="26" HorizontalAlignment="Right" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Click="ClearConsole_Click"/>
-                        </Grid>
-
-                        <!-- Console Output -->
-                        <TextBox Grid.Row="1" x:Name="TxtConsoleOutput" Background="#0A0A0A" Foreground="{DynamicResource SuccessGreen}" FontFamily="Consolas" FontSize="12" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" BorderThickness="0" Margin="10,0"/>
-
-                        <!-- Console Input -->
-                        <Grid Grid.Row="2" Margin="10">
-                            <TextBox x:Name="TxtConsoleInput" Background="{DynamicResource ControlBackground}" Foreground="{DynamicResource TextPrimary}" FontFamily="Consolas" FontSize="12" Padding="5" BorderBrush="{DynamicResource BorderBrush}" KeyDown="ConsoleInput_KeyDown"/>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <!-- CONSOLE VIEW -->
+                <views:ConsoleView Grid.Column="2" x:Name="ConsoleViewPanel"/>
             </Grid>
 
             <!-- STATUS BAR -->
