@@ -15,44 +15,27 @@ namespace Hermes_Executor
 {
     public partial class MainWindow : Window
     {
+        private readonly Injector _injector;
         private readonly ScriptEngine _scriptEngine;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            _injector = new Injector();
             _scriptEngine = new ScriptEngine();
+
+            _injector.OnLog += AddConsoleMessage;
             _scriptEngine.OnLog += AddConsoleMessage;
 
             // Wire up execute button from ScriptEditor view
             ScriptEditorView.BtnExecute.Click += Execute_Click;
-
-            // Load VS Code-style Lua syntax highlighting
-            LoadLuaHighlighting();
-
-            // Setup AvalonEdit sample text
-            ScriptEditorControl.Text = "-- Welcome to Hermes Executor\nprint(\"Hello, Hermes!\")";
-            
-            // Track cursor position
-            ScriptEditorControl.TextArea.Caret.PositionChanged += Caret_PositionChanged;
 
             // Wire up console commands
             ConsoleViewPanel.OnCommandSubmitted += ProcessConsoleCommand;
 
             AddConsoleMessage("Hermes Executor v1.0 initialized with Auto-Attach engine.");
             AddConsoleMessage("Type 'help' in console for available commands.");
-        }
-
-        private void LoadLuaHighlighting()
-        {
-            try
-            {
-                ScriptEditorControl.TextArea.TextView.LineTransformers.Add(new LuaColorizer());
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Lua Highlighting Error: {ex.Message}");
-            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -173,12 +156,6 @@ namespace Hermes_Executor
                 RobloxStatusDot.Fill = System.Windows.Media.Brushes.Red;
                 TxtRobloxStatus.Text = "Offline";
             }
-        }
-
-        private void Caret_PositionChanged(object? sender, EventArgs e)
-        {
-            var caret = ScriptEditorControl.TextArea.Caret;
-            TxtEditorStatus.Text = $"Ln: {caret.Line} | Col: {caret.Column}";
         }
 
         private void ShowSplash_Click(object sender, RoutedEventArgs e)

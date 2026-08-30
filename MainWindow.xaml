@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:Hermes_Executor.Views"
         xmlns:controls="clr-namespace:Hermes_Executor.Controls"
+        xmlns:avalondit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         Title="Hermes Executor v1.0" Height="768" Width="1024"
         Icon="pack://application:,,,/Controls/Resource/hermes_icon.ico"
@@ -151,43 +152,6 @@
 
                 <!-- SCRIPT EDITOR VIEW -->
                 <views:ScriptEditor Grid.Column="1" x:Name="ScriptEditorView"/>
-
-                    <!-- Editor Toolbar -->
-                    <Grid Grid.Row="0" Background="{DynamicResource BackgroundLight}" Margin="10,5">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="📝 Script • LUA" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <Button Content="▶ EXECUTE" Width="90" Height="26" Background="{DynamicResource HermesGold}" Foreground="{DynamicResource BackgroundDark}" FontWeight="Bold" BorderThickness="0" Click="Execute_Click">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="3">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- AvalonEdit Editor -->
-                    <avalondit:TextEditor Grid.Row="1" x:Name="ScriptEditorControl"
-                                          Background="#121316" Foreground="#D4D4D4"
-                                          LineNumbersForeground="#6E7681"
-                                          FontFamily="Consolas" FontSize="13"
-                                          ShowLineNumbers="True"
-                                          Margin="10,0"/>
-
-                    <!-- Editor Status -->
-                    <StatusBar Grid.Row="2" Background="Transparent" Foreground="{DynamicResource TextSecondary}">
-                        <StatusBarItem>
-                            <TextBlock x:Name="TxtEditorStatus" Text="Ln: 1 | Col: 1"/>
-                        </StatusBarItem>
-                        <StatusBarItem HorizontalAlignment="Right">
-                            <TextBlock Text="UTF-8 | Lua"/>
-                        </StatusBarItem>
-                    </StatusBar>
-                </Grid>
 
                 <!-- CONSOLE VIEW -->
                 <views:ConsoleView Grid.Column="2" x:Name="ConsoleViewPanel"/>
