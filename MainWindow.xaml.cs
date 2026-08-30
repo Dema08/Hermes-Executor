@@ -153,7 +153,7 @@ namespace Hermes_Executor
             ClearConsole();
         }
 
-        private void AddConsoleMessage(string message)
+        public void AddConsoleMessage(string message)
         {
             Dispatcher.Invoke(() =>
             {
