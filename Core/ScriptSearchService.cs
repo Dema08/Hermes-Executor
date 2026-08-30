@@ -37,17 +37,8 @@ public class ScriptSearchService
         var results =
             await Task.WhenAll(tasks);
 
-        var aggregated = results
+        return results
             .SelectMany(x => x)
             .ToList();
-
-        if (aggregated.Count == 0)
-        {
-            var mockProvider = new MockScriptProvider();
-            var mockResults = await mockProvider.SearchAsync(searchKey, cancellationToken);
-            aggregated.AddRange(mockResults);
-        }
-
-        return aggregated;
     }
 }

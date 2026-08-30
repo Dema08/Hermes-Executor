@@ -28,14 +28,22 @@ public class RScriptProvider : IScriptProvider
     {
         _httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://api.rscripts.net/")
+            BaseAddress = new Uri("https://api.rscripts.net/"),
+            Timeout = TimeSpan.FromSeconds(5)
         };
 
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue(
-                "Bearer",
-                apiKey
-            );
+        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        );
+
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue(
+                    "Bearer",
+                    apiKey
+                );
+        }
 
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue(
@@ -50,68 +58,31 @@ public class RScriptProvider : IScriptProvider
         CancellationToken cancellationToken = default)
     {
         string endpointPath = string.IsNullOrWhiteSpace(query)
-            ? "v1/scripts?limit=30&page=1"
+            ? "v1/scripts?limit=20&page=1"
             : "v1/search" +
               $"?q={Uri.EscapeDataString(query)}" +
               "&index=scripts" +
-              "&limit=30" +
+              "&limit=20" +
               "&page=1" +
               "&includeScript=true";
 
         HttpResponseMessage? response = null;
         string json = string.Empty;
 
-        // Try base address + endpoint path
         try
         {
-            response = await _httpClient.GetAsync(endpointPath, cancellationToken);
-            json = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(10));
+
+            response = await _httpClient.GetAsync(endpointPath, cts.Token);
+            json = await response.Content.ReadAsStringAsync(cts.Token);
             if (response.IsSuccessStatusCode)
             {
-                return ParseScriptsJson(json);
+                var scripts = ParseScriptsJson(json);
+                return scripts;
             }
         }
         catch { }
-
-        // Try fallback endpoints
-        foreach (var endpoint in _fallbackEndpoints)
-        {
-            try
-            {
-                var fullUrl = endpoint.EndsWith("/") ? endpoint + endpointPath : endpoint + "/" + endpointPath;
-                using var fallbackClient = new HttpClient();
-                fallbackClient.DefaultRequestHeaders.Authorization = _httpClient.DefaultRequestHeaders.Authorization;
-                fallbackClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                
-                response = await fallbackClient.GetAsync(fullUrl, cancellationToken);
-                json = await response.Content.ReadAsStringAsync(cancellationToken);
-                if (response.IsSuccessStatusCode)
-                {
-                    return ParseScriptsJson(json);
-                }
-            }
-            catch { }
-        }
-
-        // If all failed, try a direct fetch on fallback endpoints assuming they are direct index lists
-        foreach (var endpoint in _fallbackEndpoints)
-        {
-            try
-            {
-                using var fallbackClient = new HttpClient();
-                response = await fallbackClient.GetAsync(endpoint, cancellationToken);
-                json = await response.Content.ReadAsStringAsync(cancellationToken);
-                if (response.IsSuccessStatusCode)
-                {
-                    var scripts = ParseScriptsJson(json);
-                    if (scripts.Count > 0)
-                    {
-                        return scripts;
-                    }
-                }
-            }
-            catch { }
-        }
 
         return Array.Empty<ScriptItem>();
     }

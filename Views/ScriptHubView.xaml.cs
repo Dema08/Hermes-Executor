@@ -73,17 +73,8 @@ namespace Hermes_Executor.Views
             EmptyState.Visibility = Visibility.Visible;
 
             string? apiKey = ApiKeyManager.LoadApiKey();
-
-            if (!string.IsNullOrWhiteSpace(apiKey))
-            {
-                IScriptProvider[] providers = { new RScriptProvider(apiKey) };
-                _searchService = new ScriptSearchService(providers);
-            }
-            else
-            {
-                IScriptProvider[] providers = { new MockScriptProvider() };
-                _searchService = new ScriptSearchService(providers);
-            }
+            IScriptProvider[] providers = { new RScriptProvider(apiKey ?? string.Empty) };
+            _searchService = new ScriptSearchService(providers);
 
             Loaded += (s, e) =>
             {
@@ -209,7 +200,8 @@ namespace Hermes_Executor.Views
 
                 try
                 {
-                    byte[] data = await _httpClient.GetByteArrayAsync(uri);
+                    using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(3));
+                    byte[] data = await _httpClient.GetByteArrayAsync(uri, cts.Token);
 
                     await Dispatcher.InvokeAsync(() =>
                     {
