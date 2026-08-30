@@ -18,10 +18,29 @@
                 <TextBlock Text="📝 Script • LUA" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" VerticalAlignment="Center"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button x:Name="BtnExecute" Content="▶ EXECUTE" Width="90" Height="26" Background="{DynamicResource HermesGold}" Foreground="{DynamicResource BackgroundDark}" FontWeight="Bold" BorderThickness="0">
+                <Button x:Name="BtnExecute" Content="▶ EXECUTE" Width="90" Height="26" Background="{DynamicResource HermesGold}" Foreground="{DynamicResource BackgroundDark}" FontWeight="Bold" BorderThickness="0" ToolTip="Pilih untuk menjalankan script Lua yang aktif di editor">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="3">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="border"
+                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                To="#FFE44D" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="border"
+                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                To="#C0A000" Duration="0:0:0.1"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </ControlTemplate>

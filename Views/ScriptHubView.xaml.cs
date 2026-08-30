@@ -69,20 +69,18 @@ namespace Hermes_Executor.Views
 
                 if (results.Count == 0)
                 {
-                    MessageBox.Show(
+                    HermesMessageBox.Show(
+                        "Script Hub",
                         $"Tidak ada script untuk \"{query}\".",
-                        "Hermes Script Hub",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                        HermesMessageBox.NotificationType.Info);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
+                HermesMessageBox.Show(
+                    "Error",
                     "Pencarian Script Hub gagal:\n\n" + ex.Message,
-                    "Hermes Script Hub",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                    HermesMessageBox.NotificationType.Error);
             }
             finally
             {
@@ -174,21 +172,19 @@ namespace Hermes_Executor.Views
 
             if (string.IsNullOrWhiteSpace(_selectedScript.Script))
             {
-                MessageBox.Show(
+                HermesMessageBox.Show(
+                    "Warning",
                     "Source script tidak tersedia.",
-                    "Hermes Script Hub",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    HermesMessageBox.NotificationType.Warning);
                 return;
             }
 
-            Clipboard.SetText(_selectedScript.Script);
+             Clipboard.SetText(_selectedScript.Script);
 
-            MessageBox.Show(
-                "Script berhasil disalin ke clipboard.",
-                "Hermes Script Hub",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+             HermesMessageBox.Show(
+                 "Script Copied",
+                 "Script berhasil disalin ke clipboard.",
+                 HermesMessageBox.NotificationType.Success);
         }
 
         private void OpenTabSelected_Click(

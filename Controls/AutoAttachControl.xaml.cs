@@ -131,8 +131,8 @@ namespace Hermes_Executor.Controls
 
         private void KillRoblox_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("Kill Roblox process?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result == MessageBoxResult.Yes)
+            bool confirm = Hermes_Executor.Views.HermesMessageBox.Show("Konfirmasi", "Yakin ingin menghentikan (kill) proses Roblox?", Hermes_Executor.Views.HermesMessageBox.NotificationType.Warning, true);
+            if (confirm)
             {
                 _injector.KillRoblox();
             }

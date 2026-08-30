@@ -12,60 +12,44 @@
                            FontSize="14"/>
                 <ToggleButton x:Name="AutoAttachToggle"
                               HorizontalAlignment="Right"
-                              Width="50" Height="24"
+                              Width="52" Height="26"
                               Background="#2D2D2D"
                               Foreground="#A0A0A0"
+                              ToolTip="Klik untuk mengaktifkan/menonaktifkan Auto-Attach"
                               Checked="AutoAttach_Checked"
                               Unchecked="AutoAttach_Unchecked">
-                    <ToggleButton.Resources>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ToggleButton">
-                                        <Border Background="#2D2D2D" CornerRadius="12">
-                                            <Border x:Name="ToggleIndicator" 
-                                                    Background="#FF4444" 
-                                                    CornerRadius="10"
-                                                    Width="20" Height="20"
-                                                    HorizontalAlignment="Left"
-                                                    Margin="2">
-                                                <Border.Triggers>
-                                                    <EventTrigger RoutedEvent="ToggleButton.Checked">
-                                                        <BeginStoryboard>
-                                                            <Storyboard>
-                                                                <ThicknessAnimation Storyboard.TargetName="ToggleIndicator"
-                                                                                   Storyboard.TargetProperty="Margin"
-                                                                                   From="2,2" To="28,2"
-                                                                                   Duration="0:0:0.2"/>
-                                                                <ColorAnimation Storyboard.TargetName="ToggleIndicator"
-                                                                                Storyboard.TargetProperty="Background.Color"
-                                                                                From="#FF4444" To="#00FF44"
-                                                                                Duration="0:0:0.2"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </EventTrigger>
-                                                    <EventTrigger RoutedEvent="ToggleButton.Unchecked">
-                                                        <BeginStoryboard>
-                                                            <Storyboard>
-                                                                <ThicknessAnimation Storyboard.TargetName="ToggleIndicator"
-                                                                                   Storyboard.TargetProperty="Margin"
-                                                                                   From="28,2" To="2,2"
-                                                                                   Duration="0:0:0.2"/>
-                                                                <ColorAnimation Storyboard.TargetName="ToggleIndicator"
-                                                                                Storyboard.TargetProperty="Background.Color"
-                                                                                From="#00FF44" To="#FF4444"
-                                                                                Duration="0:0:0.2"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </EventTrigger>
-                                                </Border.Triggers>
-                                            </Border>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ToggleButton.Resources>
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="SwitchBorder" Background="#222222" BorderBrush="#3D3D3D" BorderThickness="1" CornerRadius="13" Cursor="Hand">
+                                <Grid>
+                                    <!-- Background Track Color Indicator -->
+                                    <Border x:Name="TrackBg" Background="#FF4444" CornerRadius="12" Opacity="0.2"/>
+                                    <Border x:Name="ToggleIndicator" 
+                                            Background="#FF4444" 
+                                            CornerRadius="10"
+                                            Width="20" Height="20"
+                                            HorizontalAlignment="Left"
+                                            Margin="2">
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.3" Color="Black"/>
+                                        </Border.Effect>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="ToggleIndicator" Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter TargetName="ToggleIndicator" Property="Background" Value="#FFD700"/>
+                                    <Setter TargetName="TrackBg" Property="Background" Value="#FFD700"/>
+                                    <Setter TargetName="TrackBg" Property="Opacity" Value="0.3"/>
+                                    <Setter TargetName="SwitchBorder" Property="BorderBrush" Value="#FFD700"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="SwitchBorder" Property="BorderBrush" Value="#FFE44D"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
                 </ToggleButton>
             </Grid>
 
@@ -125,16 +109,36 @@
 
                 <Button Grid.Column="0" 
                         x:Name="InjectButton"
-                        Content="⚡ INJECT" 
+                        Content="💉 INJECT" 
                         Background="#FFD700"
                         Foreground="Black"
                         FontWeight="Bold"
                         Padding="10,8"
                         Margin="0,0,5,0"
+                        ToolTip="Pilih untuk melakukan Inject script engine ke dalam proses Roblox"
                         Click="InjectButton_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="border"
+                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                To="#FFE44D" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="border"
+                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                To="#C0A000" Duration="0:0:0.1"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </ControlTemplate>
@@ -143,16 +147,41 @@
 
                 <Button Grid.Column="1" 
                         x:Name="KillRobloxButton"
-                        Content="🛑 KILL" 
-                        Background="#FF4444"
-                        Foreground="White"
+                        Content="🚫 KILL " 
+                        Background="#2A2A2A"
+                        Foreground="#FFD700"
+                        BorderBrush="#FFD700"
+                        BorderThickness="1"
                         FontWeight="Bold"
                         Padding="10,8"
                         Margin="5,0,0,0"
+                        ToolTip="Pilih untuk menutup paksa proses Roblox (Kill)"
                         Click="KillRoblox_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="border"
+                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                To="#3A3A3A" Duration="0:0:0.15"/>
+                                                <ColorAnimation Storyboard.TargetName="border"
+                                                                Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                                To="#FFE44D" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="border"
+                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                To="#202020" Duration="0:0:0.1"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </ControlTemplate>

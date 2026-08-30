@@ -12,4 +12,95 @@
     <SolidColorBrush x:Key="SuccessGreen" Color="#00FF00"/>
     <SolidColorBrush x:Key="ErrorRed" Color="#FF4444"/>
     <SolidColorBrush x:Key="WarningYellow" Color="#FFAA00"/>
+
+    <!-- Global Button Style with Yellow Hover Animation / Placeholder Effect -->
+    <Style TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#252525"/>
+                            <Setter Property="Foreground" Value="{DynamicResource HermesGold}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#303030"/>
+                            <Setter Property="Foreground" Value="{DynamicResource HermesGoldDark}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!-- Global ScrollBar Style -->
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="#0D0D0D"/>
+        <Setter Property="Width" Value="10"/>
+        <Setter Property="MinWidth" Value="10"/>
+        <Setter Property="Height" Value="NaN"/>
+        <Setter Property="MinHeight" Value="10"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid Background="#0D0D0D" SnapsToDevicePixels="True">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="0"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="0"/>
+                        </Grid.RowDefinitions>
+                        <Track x:Name="PART_Track" Grid.Row="1" IsDirectionReversed="True">
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Background="#FFD700" CornerRadius="5" Margin="2"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Height" Value="10"/>
+                <Setter Property="MinHeight" Value="10"/>
+                <Setter Property="Width" Value="NaN"/>
+                <Setter Property="MinWidth" Value="10"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ScrollBar">
+                            <Grid Background="#0D0D0D" SnapsToDevicePixels="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="0"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="0"/>
+                                </Grid.ColumnDefinitions>
+                                <Track x:Name="PART_Track" Grid.Column="1" IsDirectionReversed="False">
+                                    <Track.Thumb>
+                                        <Thumb>
+                                            <Thumb.Template>
+                                                <ControlTemplate TargetType="Thumb">
+                                                    <Border Background="#FFD700" CornerRadius="5" Margin="2"/>
+                                                </ControlTemplate>
+                                            </Thumb.Template>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 </ResourceDictionary>

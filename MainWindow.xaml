@@ -30,8 +30,8 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="✦" Foreground="{DynamicResource HermesGold}" FontSize="16" FontWeight="Bold" Margin="0,0,8,0"/>
-                    <TextBlock Text="HERMES EXECUTOR" Foreground="{DynamicResource TextPrimary}" FontSize="14" FontWeight="Bold"/>
+                    <Image Source="pack://application:,,,/Controls/Resource/hermes_icon.ico" Width="18" Height="18" Margin="0,0,8,0"/>
+                    <TextBlock Text="HERMES EXECUTOR" Foreground="{DynamicResource TextPrimary}" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
@@ -113,7 +113,6 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
                         <!-- Auto-Attach Control -->
@@ -130,26 +129,7 @@
                             <Button Content="💾 Save Script" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="SaveScript_Click"/>
                             <Button Content="📋 From Clipboard" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="ClipboardScript_Click"/>
                             <Button Content="🗑️ Clear Script" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="ClearScript_Click"/>
-                            <Button Content="✨ Loading Screen" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0" Padding="8" Margin="0,2" Click="ShowSplash_Click"/>
                         </StackPanel>
-
-                        <!-- Script Library TreeView -->
-                        <TreeView Grid.Row="2" Background="Transparent" BorderThickness="0" Margin="10">
-                            <TreeViewItem Header="Script Library" Foreground="{DynamicResource HermesGold}" IsExpanded="True">
-                                <TreeViewItem Header="🎮 Games" Foreground="{DynamicResource TextPrimary}">
-                                    <TreeViewItem Header="Universal Hub" Foreground="{DynamicResource TextSecondary}"/>
-                                    <TreeViewItem Header="BedWars GUI" Foreground="{DynamicResource TextSecondary}"/>
-                                </TreeViewItem>
-                                <TreeViewItem Header="🛠️ Utilities" Foreground="{DynamicResource TextPrimary}">
-                                    <TreeViewItem Header="Infinite Yield" Foreground="{DynamicResource TextSecondary}"/>
-                                    <TreeViewItem Header="Dex Explorer" Foreground="{DynamicResource TextSecondary}"/>
-                                </TreeViewItem>
-                                <TreeViewItem Header="🎨 Visuals" Foreground="{DynamicResource TextPrimary}">
-                                    <TreeViewItem Header="ESP &amp; Aimlock" Foreground="{DynamicResource TextSecondary}"/>
-                                </TreeViewItem>
-                                <TreeViewItem Header="📦 Custom" Foreground="{DynamicResource TextPrimary}"/>
-                            </TreeViewItem>
-                        </TreeView>
                     </Grid>
                 </Border>
 

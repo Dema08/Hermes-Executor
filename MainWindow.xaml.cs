@@ -225,10 +225,6 @@ namespace Hermes_Executor
             }
         }
 
-        private void ShowSplash_Click(object sender, RoutedEventArgs e)
-        {
-            SplashScreenWindow splash = new SplashScreenWindow();
-            splash.Show();
-        }
+
     }
 }
