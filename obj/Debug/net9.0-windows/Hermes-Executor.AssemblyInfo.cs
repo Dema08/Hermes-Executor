@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Hermes Roblox Executor - Premium UI")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c492d485249f6bda2cd3f8fc3f3993d6086b3b80")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+83f428ecf45c29f5ed6a4bf360783e4caf1d8131")]
 [assembly: System.Reflection.AssemblyProductAttribute("Hermes Executor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Hermes Executor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
