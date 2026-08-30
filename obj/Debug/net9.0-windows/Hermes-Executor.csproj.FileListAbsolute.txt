@@ -159,3 +159,4 @@ C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\refint\Hermes-Executor.d
 C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Hermes-Executor.pdb
 C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Hermes-Executor.genruntimeconfig.cache
 C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\ref\Hermes-Executor.dll
+C:\laragon\www\Hermes-Executor\obj\Debug\net9.0-windows\Hermes-Executor.sourcelink.json
