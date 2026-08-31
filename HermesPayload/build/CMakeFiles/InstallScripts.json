@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/laragon/www/Hermes-Executor/HermesPayload/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

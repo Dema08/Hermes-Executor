@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/laragon/www/Hermes-Executor/HermesCore/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -1,0 +1,10 @@
+# ninja log v7
+47	374	8098653295799608	CMakeFiles/HermesPayload.dir/Payload.cpp.obj.ddi	c6cb0711ba05a357
+376	455	8098653299816594	CMakeFiles/HermesPayload.dir/CXX.dd	4dbb1f2d74f1d5fe
+376	455	8098653299816594	CMakeFiles/HermesPayload.dir/CXXModules.json	4dbb1f2d74f1d5fe
+376	455	8098653299816594	CMakeFiles/HermesPayload.dir/Payload.cpp.obj.modmap	4dbb1f2d74f1d5fe
+465	955	8098653299987305	CMakeFiles/HermesPayload.dir/Payload.cpp.obj	5c84c17e81164a4f
+955	1366	8098653304883859	HermesPayload.dll	749b1522d70aef98
+955	1366	8098653304883859	HermesPayload.lib	749b1522d70aef98
+5	245	8098655417817874	HermesPayload.dll	749b1522d70aef98
+5	245	8098655417817874	HermesPayload.lib	749b1522d70aef98

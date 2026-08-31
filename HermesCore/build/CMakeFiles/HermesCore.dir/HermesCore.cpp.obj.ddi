@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "CMakeFiles\\HermesCore.dir\\HermesCore.cpp.obj",
+            "outputs": [
+                "CMakeFiles\\HermesCore.dir\\HermesCore.cpp.obj.ddi"
+            ],
+            "requires": []
+        }
+    ]
+}

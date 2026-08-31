@@ -1,0 +1,9 @@
+ninja_dyndep_version = 1.0
+build CMakeFiles\HermesCore.dir\Executor\CorescriptExecutor.cpp.obj: dyndep
+
+build CMakeFiles\HermesCore.dir\Executor\LuauScanner.cpp.obj: dyndep
+
+build CMakeFiles\HermesCore.dir\HermesCore.cpp.obj: dyndep
+
+build CMakeFiles\HermesCore.dir\Injector\ManualMapper.cpp.obj: dyndep
+

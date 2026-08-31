@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "CMakeFiles\\HermesCore.dir\\Executor\\CorescriptExecutor.cpp.obj",
+            "outputs": [
+                "CMakeFiles\\HermesCore.dir\\Executor\\CorescriptExecutor.cpp.obj.ddi"
+            ],
+            "requires": []
+        }
+    ]
+}

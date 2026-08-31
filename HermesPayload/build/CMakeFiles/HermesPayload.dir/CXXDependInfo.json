@@ -1,0 +1,27 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "MSVC",
+	"compiler-id" : "MSVC",
+	"compiler-simulate-id" : "",
+	"config" : "Debug",
+	"cxx-modules" : {},
+	"database-info" : null,
+	"dir-cur-bld" : "C:/laragon/www/Hermes-Executor/HermesPayload/build",
+	"dir-cur-src" : "C:/laragon/www/Hermes-Executor/HermesPayload",
+	"dir-top-bld" : "C:/laragon/www/Hermes-Executor/HermesPayload/build",
+	"dir-top-src" : "C:/laragon/www/Hermes-Executor/HermesPayload",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : [],
+	"language" : "CXX",
+	"linked-target-dirs" : [],
+	"module-dir" : "C:/laragon/www/Hermes-Executor/HermesPayload/build/CMakeFiles/HermesPayload.dir",
+	"sources" : 
+	{
+		"CMakeFiles/HermesPayload.dir/Payload.cpp.obj" : 
+		{
+			"language" : "CXX",
+			"source" : "C:/laragon/www/Hermes-Executor/HermesPayload/Payload.cpp"
+		}
+	}
+}

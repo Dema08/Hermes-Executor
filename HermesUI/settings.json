@@ -1,0 +1,11 @@
+{
+  "SidebarWidth": 300,
+  "ConsoleWidth": 300,
+  "BottomPanelHeight": 210,
+  "ShowSidebar": true,
+  "ShowActivityBar": true,
+  "ShowConsole": true,
+  "ShowBottomPanel": true,
+  "LastScriptPath": null,
+  "Theme": "Dark"
+}
