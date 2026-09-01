@@ -51,7 +51,7 @@ namespace Hermes_Executor.Views
             // Update status text based on progress stage
             if (progress < 25)
             {
-                TxtLoadingStatus.Text = "Initializing Hermes Core Engine...";
+                TxtLoadingStatus.Text = "Initializing Hermes Engine...";
             }
             else if (progress < 50)
             {
@@ -59,15 +59,15 @@ namespace Hermes_Executor.Views
             }
             else if (progress < 75)
             {
-                TxtLoadingStatus.Text = "Loading Lua Script Library & AvalonEdit...";
+                TxtLoadingStatus.Text = "Loading Lua Engine & Components...";
             }
             else if (progress < 95)
             {
-                TxtLoadingStatus.Text = "Establishing Security Channels & Environment...";
+                TxtLoadingStatus.Text = "Preparing Environment...";
             }
             else
             {
-                TxtLoadingStatus.Text = "System Ready! Launching Hermes Executor...";
+                TxtLoadingStatus.Text = "Almost Ready! Launching Hermes Executor...";
             }
 
             // Track width calculation

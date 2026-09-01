@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <Resource Include="Controls\Resource\hermes_loadingscreen.jpg" />
+    <Resource Include="Controls\Resource\caduceus_logo.jpg" />
     <Resource Include="Controls\Resource\hermes_icon.ico" />
     <EmbeddedResource Include="Controls\Resource\LuaVSCode.xshd" />
   </ItemGroup>
