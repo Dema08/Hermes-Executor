@@ -5,7 +5,7 @@
   "ShowSidebar": true,
   "ShowActivityBar": true,
   "ShowConsole": true,
-  "ShowBottomPanel": true,
+  "ShowBottomPanel": false,
   "LastScriptPath": null,
   "Theme": "Dark"
 }
