@@ -185,8 +185,25 @@ namespace Hermes_Executor.Core
 
         private bool PerformInjection(int pid)
         {
-            // Placeholder untuk real manual mapping / DLL injection
-            return true;
+            try
+            {
+                OnLog?.Invoke("🔧 Initializing HermesCore injector...");
+                bool result = ScriptEngine.Inject();
+
+                if (result)
+                {
+                    bool isInjected = ScriptEngine.IsConnected;
+                    OnLog?.Invoke($"📊 IsConnected = {isInjected}");
+                    OnLog?.Invoke($"📊 IsInjected = {isInjected}");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                OnLog?.Invoke($"❌ Injection error: {ex.Message}");
+                return false;
+            }
         }
 
         public void KillRoblox()

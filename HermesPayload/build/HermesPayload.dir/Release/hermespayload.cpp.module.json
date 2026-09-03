@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "HermesPayload.dir\\Release\\HermesPayload.obj",
+            "outputs": [
+                "HermesPayload.dir\\Release\\"
+            ],
+            "requires": []
+        }
+    ]
+}

@@ -62,24 +62,25 @@ HANDLE GetRobloxProcessHandle(DWORD pid) {
 }
 
 void BypassHyperionIntegrity(HANDLE hProcess, LPVOID pBase) {
+    // 1. Patch Page Hash Check (InsertSet)
     BYTE nopBytes[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
     DWORD_PTR pPageHashCheck = (DWORD_PTR)pBase + Offsets::Offset_InsertSet;
-
     DWORD oldProtect;
     VirtualProtectEx(hProcess, (LPVOID)pPageHashCheck, sizeof(nopBytes), PAGE_EXECUTE_READWRITE, &oldProtect);
     WriteProcessMemory(hProcess, (LPVOID)pPageHashCheck, nopBytes, sizeof(nopBytes), NULL);
     VirtualProtectEx(hProcess, (LPVOID)pPageHashCheck, sizeof(nopBytes), oldProtect, &oldProtect);
 
-    BYTE jmpBytes[] = { 0xFF, 0xE0 };
+    // 2. Patch CFG Check (_guard_check_icall)
+    BYTE retBytes[] = { 0xC3 }; // RET
     DWORD_PTR pCFGCheck = (DWORD_PTR)pBase + Offsets::Offset_CFG_Check;
-    VirtualProtectEx(hProcess, (LPVOID)pCFGCheck, sizeof(jmpBytes), PAGE_EXECUTE_READWRITE, &oldProtect);
-    WriteProcessMemory(hProcess, (LPVOID)pCFGCheck, jmpBytes, sizeof(jmpBytes), NULL);
-    VirtualProtectEx(hProcess, (LPVOID)pCFGCheck, sizeof(jmpBytes), oldProtect, &oldProtect);
+    VirtualProtectEx(hProcess, (LPVOID)pCFGCheck, sizeof(retBytes), PAGE_EXECUTE_READWRITE, &oldProtect);
+    WriteProcessMemory(hProcess, (LPVOID)pCFGCheck, retBytes, sizeof(retBytes), NULL);
+    VirtualProtectEx(hProcess, (LPVOID)pCFGCheck, sizeof(retBytes), oldProtect, &oldProtect);
 
+    // 3. Whitelist pages
     DWORD_PTR pWhitelist = (DWORD_PTR)pBase + Offsets::Offset_WhitelistedPages;
     DWORD pageIndex = (DWORD)((DWORD_PTR)pBase >> Offsets::kPageShift);
-    WriteProcessMemory(hProcess, (LPVOID)(pWhitelist + (pageIndex * 8)),
-        &pageIndex, sizeof(DWORD), NULL);
+    WriteProcessMemory(hProcess, (LPVOID)(pWhitelist + (pageIndex * 8)), &pageIndex, sizeof(DWORD), NULL);
 }
 
 bool ResolveImports(HANDLE hProcess, LPVOID pRemoteBase, PIMAGE_NT_HEADERS pNtHeaders,
@@ -288,5 +289,23 @@ bool ManualMapInject(DWORD pid) {
     CloseHandle(hThread);
     CloseHandle(hProcess);
 
+    Sleep(500);
+
+    HANDLE hMarker = CreateFileA("C:\\hermes_payload_active.txt", 
+                                  GENERIC_READ, FILE_SHARE_READ, NULL, 
+                                  OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hMarker == INVALID_HANDLE_VALUE) {
+        OutputDebugStringA("[ManualMapper] ⚠️ Payload marker NOT found, but DLL mapped.\n");
+    } else {
+        char buffer[256] = {0};
+        DWORD read = 0;
+        ReadFile(hMarker, buffer, sizeof(buffer) - 1, &read, NULL);
+        OutputDebugStringA("[ManualMapper] Payload marker: ");
+        OutputDebugStringA(buffer);
+        OutputDebugStringA("\n");
+        CloseHandle(hMarker);
+    }
+
+    OutputDebugStringA("[ManualMapper] ✅ Injection completed.\n");
     return true;
 }

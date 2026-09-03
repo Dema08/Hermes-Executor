@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\laragon\www\Hermes-Executor\HermesPayload\HermesPayload.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\laragon\www\Hermes-Executor\HermesPayload\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{00F96577-291D-3935-8259-EE42F3B1346C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

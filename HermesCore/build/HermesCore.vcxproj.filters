@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\laragon\www\Hermes-Executor\HermesCore\Executor\CorescriptExecutor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\laragon\www\Hermes-Executor\HermesCore\Executor\LuauScanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\laragon\www\Hermes-Executor\HermesCore\HermesCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\laragon\www\Hermes-Executor\HermesCore\Injector\ManualMapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\laragon\www\Hermes-Executor\HermesCore\Executor\CorescriptExecutor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\laragon\www\Hermes-Executor\HermesCore\Executor\LuauScanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\laragon\www\Hermes-Executor\HermesCore\HermesCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\laragon\www\Hermes-Executor\HermesCore\Injector\ManualMapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\laragon\www\Hermes-Executor\HermesCore\Offsets\Offsets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\laragon\www\Hermes-Executor\HermesCore\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{3921A36A-3902-312D-AB00-8C656D4EE48A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{CC838492-EC80-3128-9EF1-77BE8B9AC470}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

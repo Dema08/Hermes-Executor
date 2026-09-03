@@ -7,22 +7,22 @@ namespace Hermes_Executor.Core {
     public static class ScriptEngine {
         public static event Action<string>? OnLog;
 
-        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern bool InitializeInjector();
 
-        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern bool InjectRoblox();
 
         [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern bool IsInjected();
 
-        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern IntPtr GetCoreLastError();
 
-        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern bool ExecuteScript(string script);
 
-        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern bool ExecuteScriptFromFile(string filePath);
 
         [DllImport("HermesCore.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -35,6 +35,10 @@ namespace Hermes_Executor.Core {
             }
         }
 
+        public static bool Initialize() {
+            return InitializeInjector();
+        }
+
         public static bool Inject() {
             OnLog?.Invoke("Initializing injector...");
             if (!InitializeInjector()) {
@@ -45,7 +49,6 @@ namespace Hermes_Executor.Core {
             OnLog?.Invoke("Injecting into Roblox...");
             bool result = InjectRoblox();
 
-            // Debug output
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Inject result: {result}");
             System.Diagnostics.Debug.WriteLine($"[DEBUG] IsInjected: {IsInjected()}");
             System.Diagnostics.Debug.WriteLine($"[DEBUG] LastError: {LastError}");
@@ -72,26 +75,17 @@ namespace Hermes_Executor.Core {
             return ExecuteScriptFromFile(filePath);
         }
 
-        public static bool IsConnected => _isInjectedNative();
+        public static bool IsConnected => IsInjected();
         public static bool IsExecuting => IsScriptRunning();
 
-        // Alias publik yang aman untuk dipanggil dari mana saja
-        public static bool IsInjectedStatus() => _isInjectedNative();
+        public static bool IsInjectedStatus() => IsInjected();
 
-        // Helper private untuk menghindari naming conflict dengan P/Invoke
-        private static bool _isInjectedNative() {
-            try { return IsInjected(); }
-            catch { return false; }
-        }
-
-        // Status lengkap untuk debugging
         public static string GetStatus() {
-            return $"Injected: {IsInjectedStatus()}\n" +
+            return $"Injected: {IsInjected()}\n" +
                    $"Connected: {IsConnected}\n" +
                    $"LastError: {LastError}\n" +
                    $"IsExecuting: {IsScriptRunning()}\n";
         }
-
 
         public static async Task<bool> ExecuteAsync(string scriptContent) {
             if (string.IsNullOrWhiteSpace(scriptContent)) {

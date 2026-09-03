@@ -221,28 +221,25 @@ namespace Hermes_Executor {
         // ==============================================
         public async void BtnInject_Click(object sender, RoutedEventArgs e) {
             try {
-                _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] 💉 Injecting into Roblox...\n");
+                _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] 💉 Injecting into process...\n");
 
                 if (_btnInject != null) _btnInject.IsEnabled = false;
 
                 bool success = await Task.Run(() => ScriptEngine.Inject());
+                bool isInjected = ScriptEngine.IsConnected;
 
-                if (success) {
-                    _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ✅ Successfully injected!\n");
+                _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] 📊 IsConnected = {isInjected}\n");
+                _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] 📊 IsInjected = {isInjected}\n");
 
-                    // Verifikasi ulang
-                    if (ScriptEngine.IsConnected) {
-                        _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ✅ Connection verified!\n");
-                    } else {
-                        _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ⚠️ Warning: IsConnected returned false after inject!\n");
-                    }
+                if (success && isInjected) {
+                    _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ✅ Successfully injected! (REAL)\n");
 
                     if (_btnInject != null) {
                         _btnInject.Content = "✅ Injected";
                         _btnInject.Background = new SolidColorBrush(Colors.Green);
                     }
                 } else {
-                    _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ❌ Injection failed: {ScriptEngine.LastError}\n");
+                    _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ❌ Injection failed!\n");
                 }
             } catch (Exception ex) {
                 _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ❌ Error: {ex.Message}\n");
@@ -263,7 +260,6 @@ namespace Hermes_Executor {
                     return;
                 }
 
-                // Debug: cek status inject
                 _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] 📊 IsConnected = {ScriptEngine.IsConnected}\n");
                 _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] 📊 IsInjected = {ScriptEngine.IsInjectedStatus()}\n");
 
@@ -280,8 +276,6 @@ namespace Hermes_Executor {
                     _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ✅ Script executed successfully!\n");
                 } else {
                     _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ❌ Execution failed: {ScriptEngine.LastError}\n");
-                    // Debug status
-                    Debug.WriteLine(ScriptEngine.GetStatus());
                 }
             } catch (Exception ex) {
                 _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] ❌ Error: {ex.Message}\n");

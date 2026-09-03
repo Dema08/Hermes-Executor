@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "HermesCore.dir\\Release\\LuauScanner.obj",
+            "outputs": [
+                "HermesCore.dir\\Release\\"
+            ],
+            "requires": []
+        }
+    ]
+}

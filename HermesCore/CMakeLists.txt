@@ -4,11 +4,17 @@ project(HermesCore VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Set output directory ke folder HermesUI (agar mudah integrasi)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../HermesUI/bin/Release/net9.0-windows/")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../HermesUI/bin/Release/net9.0-windows/")
+# Output langsung ke folder UI (hindari subfolder Release\ dari MSBuild)
+set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/../HermesUI/bin/Release/net9.0-windows/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
+foreach(CONFIG Release Debug RelWithDebInfo MinSizeRel)
+    string(TOUPPER ${CONFIG} UCONFIG)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${UCONFIG} "${OUTPUT_DIR}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${UCONFIG} "${OUTPUT_DIR}")
+endforeach()
 
-# Tambahkan semua file .cpp
+# Tambahkan semua file .cpp dan .h
 file(GLOB SOURCES "*.cpp" "Injector/*.cpp" "Executor/*.cpp" "Offsets/*.cpp")
 file(GLOB HEADERS "*.h" "Injector/*.h" "Executor/*.h" "Offsets/*.h")
 

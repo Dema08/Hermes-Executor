@@ -1,0 +1,10 @@
+^C:\LARAGON\WWW\HERMES-EXECUTOR\HERMESCORE\BUILD\CMAKEFILES\9CFDC055660C5EF6AC8DE558173B5C9D\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/laragon/www/Hermes-Executor/HermesCore -BC:/laragon/www/Hermes-Executor/HermesCore/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/laragon/www/Hermes-Executor/HermesCore/build/HermesCore.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
