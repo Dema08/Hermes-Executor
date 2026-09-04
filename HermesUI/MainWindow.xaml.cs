@@ -645,11 +645,12 @@ namespace Hermes_Executor {
         private void Close_Click(object sender, RoutedEventArgs e) => Close();
 
         public void AddConsoleMessage(string message) {
-            _consoleViewPanel?.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}\n");
+            string line = $"[{DateTime.Now:HH:mm:ss}] {message}\n";
+            string timestamp = DateTime.Now.ToString("HH:mm:ss");
 
             Dispatcher.Invoke(() => {
+                _consoleViewPanel?.AppendText(line);
                 if (_txtOutputLog != null) {
-                    string timestamp = DateTime.Now.ToString("HH:mm:ss");
                     _txtOutputLog.AppendText($"[{timestamp}] {message}\n");
                     _txtOutputLog.ScrollToEnd();
                 }

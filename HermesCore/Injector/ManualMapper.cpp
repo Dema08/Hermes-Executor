@@ -11,6 +11,36 @@
 
 extern "C" __declspec(dllexport) void PayloadEntry();
 
+// Base address RobloxPlayerBeta.exe yang di-resolve saat runtime (ASLR-safe).
+// Dipakai oleh BypassHyperionIntegrity dan dapat dibaca komponen lain.
+static uint64_t g_robloxBase = 0;
+
+uint64_t GetRobloxModuleBase() {
+    return g_robloxBase;
+}
+
+// Resolve base address modul (mis. RobloxPlayerBeta.exe) di proses target saat runtime.
+uint64_t ResolveRobloxBase(HANDLE hProcess) {
+    HMODULE hMods[1024];
+    DWORD cbNeeded = 0;
+    if (!EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded)) return 0;
+
+    DWORD count = cbNeeded / sizeof(HMODULE);
+    for (DWORD i = 0; i < count; ++i) {
+        char szName[MAX_PATH];
+        if (!GetModuleBaseNameA(hProcess, hMods[i], szName, sizeof(szName))) continue;
+        std::string name = szName;
+        std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+        if (name.find("robloxplayerbeta") != std::string::npos ||
+            name.find("robloxstudiobeta") != std::string::npos) {
+            MODULEINFO mi{};
+            if (GetModuleInformation(hProcess, hMods[i], &mi, sizeof(mi)))
+                return (uint64_t)(uintptr_t)mi.lpBaseOfDll;
+        }
+    }
+    return 0;
+}
+
 DWORD FindRobloxProcess() {
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE) return 0;
@@ -62,9 +92,16 @@ HANDLE GetRobloxProcessHandle(DWORD pid) {
 }
 
 void BypassHyperionIntegrity(HANDLE hProcess, LPVOID pBase) {
+    // pBase = base address RobloxPlayerBeta.exe yang di-resolve saat runtime.
+    // (BUKAN alamat alokasi payload.)
+    uint64_t base = (uint64_t)(uintptr_t)pBase;
+    char dbg[256];
+    snprintf(dbg, sizeof(dbg), "[BypassHyperionIntegrity] Roblox base = 0x%llX", base);
+    OutputDebugStringA(dbg);
+
     // 1. Patch Page Hash Check (InsertSet)
     BYTE nopBytes[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
-    DWORD_PTR pPageHashCheck = (DWORD_PTR)pBase + Offsets::Offset_InsertSet;
+    DWORD_PTR pPageHashCheck = (DWORD_PTR)base + Offsets::Offset_InsertSet;
     DWORD oldProtect;
     VirtualProtectEx(hProcess, (LPVOID)pPageHashCheck, sizeof(nopBytes), PAGE_EXECUTE_READWRITE, &oldProtect);
     WriteProcessMemory(hProcess, (LPVOID)pPageHashCheck, nopBytes, sizeof(nopBytes), NULL);
@@ -72,14 +109,14 @@ void BypassHyperionIntegrity(HANDLE hProcess, LPVOID pBase) {
 
     // 2. Patch CFG Check (_guard_check_icall)
     BYTE retBytes[] = { 0xC3 }; // RET
-    DWORD_PTR pCFGCheck = (DWORD_PTR)pBase + Offsets::Offset_CFG_Check;
+    DWORD_PTR pCFGCheck = (DWORD_PTR)base + Offsets::Offset_CFG_Check;
     VirtualProtectEx(hProcess, (LPVOID)pCFGCheck, sizeof(retBytes), PAGE_EXECUTE_READWRITE, &oldProtect);
     WriteProcessMemory(hProcess, (LPVOID)pCFGCheck, retBytes, sizeof(retBytes), NULL);
     VirtualProtectEx(hProcess, (LPVOID)pCFGCheck, sizeof(retBytes), oldProtect, &oldProtect);
 
     // 3. Whitelist pages
-    DWORD_PTR pWhitelist = (DWORD_PTR)pBase + Offsets::Offset_WhitelistedPages;
-    DWORD pageIndex = (DWORD)((DWORD_PTR)pBase >> Offsets::kPageShift);
+    DWORD_PTR pWhitelist = (DWORD_PTR)base + Offsets::Offset_WhitelistedPages;
+    DWORD pageIndex = (DWORD)(base >> Offsets::kPageShift);
     WriteProcessMemory(hProcess, (LPVOID)(pWhitelist + (pageIndex * 8)), &pageIndex, sizeof(DWORD), NULL);
 }
 
@@ -131,11 +168,13 @@ bool ResolveImports(HANDLE hProcess, LPVOID pRemoteBase, PIMAGE_NT_HEADERS pNtHe
     return true;
 }
 
-void RelocateImage(LPVOID pRemoteBase, PIMAGE_NT_HEADERS pNtHeaders,
-    const std::vector<BYTE>& dllData, DWORD_PTR delta) {
+void RelocateImage(const std::vector<BYTE>& dllData, PIMAGE_NT_HEADERS pNtHeaders,
+    DWORD_PTR delta) {
     PIMAGE_DATA_DIRECTORY pRelocDir = &pNtHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
     if (pRelocDir->Size == 0) return;
 
+    // Operasikan pada buffer LOKAL (dllData), bukan dereference alamat remote.
+    BYTE* pImage = (BYTE*)dllData.data();
     DWORD_PTR pRelocData = (DWORD_PTR)dllData.data() + pRelocDir->VirtualAddress;
     DWORD_PTR pRelocEnd = pRelocData + pRelocDir->Size;
 
@@ -151,11 +190,11 @@ void RelocateImage(LPVOID pRemoteBase, PIMAGE_NT_HEADERS pNtHeaders,
             WORD offset = pItems[i] & 0xFFF;
 
             if (type == IMAGE_REL_BASED_DIR64) {
-                DWORD_PTR* pAddress = (DWORD_PTR*)((BYTE*)pRemoteBase + pReloc->VirtualAddress + offset);
+                DWORD_PTR* pAddress = (DWORD_PTR*)(pImage + pReloc->VirtualAddress + offset);
                 *pAddress += delta;
             }
             else if (type == IMAGE_REL_BASED_HIGHLOW) {
-                DWORD* pAddress = (DWORD*)((BYTE*)pRemoteBase + pReloc->VirtualAddress + offset);
+                DWORD* pAddress = (DWORD*)(pImage + pReloc->VirtualAddress + offset);
                 *pAddress += (DWORD)delta;
             }
         }
@@ -246,6 +285,12 @@ bool ManualMapInject(DWORD pid) {
         return false;
     }
 
+    // Relokasi DILAKUKAN pada buffer lokal (dllData) SEBELUM ditulis ke remote.
+    DWORD_PTR delta = (DWORD_PTR)pRemoteBase - pNtHeaders->OptionalHeader.ImageBase;
+    if (delta) {
+        RelocateImage(dllData, pNtHeaders, delta);
+    }
+
     WriteProcessMemory(hProcess, pRemoteBase, dllData.data(),
         pNtHeaders->OptionalHeader.SizeOfHeaders, NULL);
 
@@ -260,18 +305,25 @@ bool ManualMapInject(DWORD pid) {
         }
     }
 
-    DWORD_PTR delta = (DWORD_PTR)pRemoteBase - pNtHeaders->OptionalHeader.ImageBase;
-    if (delta) {
-        RelocateImage(pRemoteBase, pNtHeaders, dllData, delta);
-    }
-
     if (!ResolveImports(hProcess, pRemoteBase, pNtHeaders, dllData)) {
         VirtualFreeEx(hProcess, pRemoteBase, 0, MEM_RELEASE);
         CloseHandle(hProcess);
         return false;
     }
 
-    BypassHyperionIntegrity(hProcess, pRemoteBase);
+    // Resolve base address RobloxPlayerBeta.exe saat runtime (ASLR-safe)
+    uint64_t robloxBase = ResolveRobloxBase(hProcess);
+    if (robloxBase) {
+        g_robloxBase = robloxBase;
+    } else {
+        g_robloxBase = 0;
+        OutputDebugStringA("[ManualMapper] ⚠️ Could not resolve Roblox base! Skipping hyperion bypass.\n");
+    }
+
+    if (g_robloxBase) {
+        // Patch Roblox memory menggunakan base address asli (bukan alokasi payload)
+        BypassHyperionIntegrity(hProcess, (LPVOID)(uintptr_t)g_robloxBase);
+    }
 
     DWORD entryPoint = pNtHeaders->OptionalHeader.AddressOfEntryPoint;
     DWORD threadId;

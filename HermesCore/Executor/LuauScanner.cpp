@@ -1,5 +1,6 @@
 #include "LuauScanner.h"
 #include "../Offsets/Offsets.h"
+#include "../Injector/ManualMapper.h"
 #include <windows.h>
 #include <psapi.h>
 #include <algorithm>
@@ -38,13 +39,25 @@ bool LuauScanner::Scan() {
 
     OutputDebugStringA("[LuauScanner] Starting static offset resolution...\n");
     
-    uint64_t base = Offsets::ROBLOX_BASE;
+    // Gunakan base Roblox yang di-resolve saat runtime (ASLR-safe), bukan nilai hardcoded.
+    uint64_t base = GetRobloxModuleBase();
+    if (base == 0) {
+        // Fallback: resolve langsung dari handle proses jika belum diset saat inject.
+        base = ResolveRobloxBase(m_hProcess);
+    }
+    if (base == 0) {
+        base = Offsets::ROBLOX_BASE; // last resort (kemungkinan salah karena ASLR)
+        OutputDebugStringA("[LuauScanner] ⚠️ Roblox base not resolved, using hardcoded value.\n");
+    }
+    
+    char dbg[256];
+    snprintf(dbg, sizeof(dbg), "[LuauScanner] Using Roblox base = 0x%llX\n", base);
+    OutputDebugStringA(dbg);
     
     m_functions.luau_load = (void*)(base + Offsets::luau_load);
     m_functions.lua_pcall = (void*)(base + Offsets::lua_pcall);
     m_functions.lua_State_ptr = (void*)(base + Offsets::lua_State);
     
-    char dbg[256];
     snprintf(dbg, sizeof(dbg), "[LuauScanner] luau_load @ %p\n", m_functions.luau_load);
     OutputDebugStringA(dbg);
     snprintf(dbg, sizeof(dbg), "[LuauScanner] lua_pcall @ %p\n", m_functions.lua_pcall);

@@ -5,6 +5,10 @@
 // Cari PID Roblox
 DWORD FindRobloxProcess();
 
+// Base address RobloxPlayerBeta.exe yang di-resolve saat runtime (ASLR-safe)
+uint64_t ResolveRobloxBase(HANDLE hProcess);
+uint64_t GetRobloxModuleBase();
+
 // Struktur data untuk manual mapping
 struct ManualMappingData {
     LPVOID pLoadLibraryA;

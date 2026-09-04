@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <fstream>
+#include <cstdio>
 
 // ==============================================
 // GLOBALS
@@ -86,18 +88,10 @@ void SetRobloxProcessHandle(HANDLE hProcess, DWORD pid) {
 // ==============================================
 // ExecuteViaLuauVM
 //
-// Builds a proper x64 Windows shellcode that:
-//   1. Writes the Lua script string into remote memory
-//   2. Calls luau_load(L, script, len, "HermesScript", 0)
-//   3. Calls lua_pcall(L, 0, -1, 0)
-//
-// Because we inject from outside the process, we cannot
-// dereference lua_State here. The shellcode receives
-// lua_State* as its parameter (passed via lpParameter to
-// CreateRemoteThread → rcx on entry).
+// Membaca lua_State* yang benar (nilai yang tersimpan di global Roblox),
+// lalu menjalankan shellcode: luau_load(script) -> lua_pcall(script).
 // ==============================================
 static bool ExecuteViaLuauVM(const std::string& script) {
-    // Retry scan if needed
     if (!g_functions.valid) {
         OutputDebugStringA("[CorescriptExecutor] LuauVM: retrying scan...");
         InitializeLuauScanner();
@@ -109,105 +103,75 @@ static bool ExecuteViaLuauVM(const std::string& script) {
 
     if (!g_hRobloxProcess || g_hRobloxProcess == INVALID_HANDLE_VALUE) return false;
 
-    // ---------------------------------------------------------------
-    // Layout of remote allocation:
-    //   [0 .. SHELLCODE_SIZE-1]  shellcode
-    //   [SHELLCODE_SIZE ..]      script string (null-terminated)
-    //   [SHELLCODE_SIZE+scriptLen+1 .. ] chunk name "HermesScript\0"
-    // ---------------------------------------------------------------
+    // --- Ambil lua_State* yang sebenarnya --------------------------------
+    // g_functions.lua_State_ptr = base + Offsets::lua_State (alamat sebuah
+    // global yang menyimpan lua_State*). Kita baca nilainya secara runtime.
+    uint64_t luaStateAddr = (uint64_t)(uintptr_t)g_functions.lua_State_ptr;
+    uint64_t luaState = 0;
+    SIZE_T bytesRead = 0;
+    bool readOk = ReadProcessMemory(g_hRobloxProcess, (LPVOID)luaStateAddr,
+                                    &luaState, sizeof(luaState), &bytesRead) &&
+                  bytesRead == sizeof(luaState);
+
+    if (!readOk || luaState == 0) {
+        // Fallback: anggap offset menunjuk langsung ke state (bukan pointer global).
+        luaState = luaStateAddr;
+        OutputDebugStringA("[CorescriptExecutor] LuauVM: global lua_State read failed, using address directly.\n");
+    }
+
+    char dbg[192];
+    snprintf(dbg, sizeof(dbg), "[CorescriptExecutor] lua_State addr=0x%llX  state=0x%llX\n",
+             luaStateAddr, luaState);
+    OutputDebugStringA(dbg);
+
+    // --- Shellcode (x64, MS ABI) ----------------------------------------
+    // Entry: rcx = lua_State* (dari lpParameter).
+    // Menyimpan hasil luau_load ke [results+0] dan lua_pcall ke [results+8].
+    // Popup hasil dibaca kembali setelah thread selesai (real status).
+    //
+    // Patches: results@0x07, chunkname@0x18, source@0x22, size@0x2C,
+    //          load@0x3F, pcall@0x5D
     const char chunkName[] = "HermesScript";
-    SIZE_T scriptLen    = script.size();        // without null
-    SIZE_T chunkNameLen = sizeof(chunkName);    // with null
+    SIZE_T scriptLen    = script.size();        // tanpa null
+    SIZE_T chunkNameLen = sizeof(chunkName);    // dengan null
 
-    // Shellcode template (x64, MS ABI):
-    // On entry:  rcx = lpParameter (we pass lua_State* from luau_State_ptr if found,
-    //            or NULL to let Roblox handle it gracefully)
-    //
-    // sub  rsp, 0x38                ; shadow space (32) + 2 extra params
-    // mov  r8,  <pScriptRemote>     ; arg3 = const char* source
-    // mov  r9,  <scriptLen>         ; arg4 = size_t len
-    // push <0>                      ; arg5 = int level  (goes to [rsp+0x28])
-    // push <pChunkName>             ; arg6 = chunkname  (goes to [rsp+0x30])  <- x64 ABI: 5th+ on stack
-    // mov  rdx, <pChunkName>        ; arg2 = bufname
-    // ; rcx already = lua_State*
-    // mov  rax, <luau_load_addr>
-    // call rax
-    // ; now stack still balanced - call lua_pcall
-    // xor  r8d, r8d                 ; nresults = 0  (LUA_MULTRET = -1 but 0 is safer for stub)
-    // xor  r9d, r9d                 ; errfunc = 0
-    // mov  edx, 0                   ; nargs = 0
-    // mov  rax, <lua_pcall_addr>
-    // call rax
-    // add  rsp, 0x38
-    // xor  eax, eax
-    // ret
-    //
-    // NOTE: This is a functional-but-simplified shellcode.
-    //       A production implementation needs the correct lua_State pointer
-    //       and compiled Luau bytecode (not raw source).
-    //       Here we use source string to demonstrate the full call chain.
-
-    // We build the shellcode as a byte vector with placeholders,
-    // then patch in the 8-byte absolute addresses.
-
-    // Shellcode bytes (placeholders = 0x00 x8 for addresses, 0x00 x4 for 32-bit values)
     std::vector<BYTE> sc = {
-        // sub rsp, 0x38
-        0x48, 0x83, 0xEC, 0x38,
-
-        // mov r8, <pScript>  (8 bytes placeholder at offset 4)
-        0x49, 0xB8,  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-
-        // mov r9, scriptLen  (8 bytes placeholder at offset 14)
-        0x49, 0xB9,  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-
-        // mov rax, <pChunkName>  (8 bytes at offset 24)
-        0x48, 0xB8,  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-
-        // mov [rsp+0x28], rax    ; 5th arg (level=0, but we put chunkname here per ABI)
-        0x48, 0x89, 0x44, 0x24, 0x28,
-
-        // mov rdx, rax           ; arg2 = chunkname (bufname)
-        0x48, 0x89, 0xC2,
-
-        // push 0 for level (6th arg at [rsp+0x30])
-        0x48, 0xC7, 0x44, 0x24, 0x30,  0x00,0x00,0x00,0x00,
-
-        // mov rax, <luau_load>  (8 bytes at offset 47)
-        0x48, 0xB8,  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-        // call rax
-        0xFF, 0xD0,
-
-        // --- lua_pcall ---
-        // xor edx, edx  (nargs=0)
-        0x33, 0xD2,
-        // xor r8d, r8d  (nresults=0)
-        0x45, 0x33, 0xC0,
-        // xor r9d, r9d  (errfunc=0)
-        0x45, 0x33, 0xC9,
-        // mov rax, <lua_pcall>  (8 bytes at offset 69)
-        0x48, 0xB8,  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-        // call rax
-        0xFF, 0xD0,
-
-        // add rsp, 0x38
-        0x48, 0x83, 0xC4, 0x38,
-        // xor eax, eax
-        0x33, 0xC0,
-        // ret
-        0xC3
+        0x50,                                     // 0x00 push rbx
+        0x41, 0x55,                               // 0x01 push r13
+        0x48, 0x89, 0xCB,                         // 0x03 mov rbx, rcx  (save L)
+        0x49, 0xBD, 0,0,0,0,0,0,0,0,              // 0x05 mov r13, results   (imm@0x07)
+        0x48, 0x83, 0xEC, 0x30,                   // 0x0F sub rsp, 0x30
+        0x48, 0x89, 0xD9,                         // 0x13 mov rcx, rbx  (L)
+        0x48, 0xBA, 0,0,0,0,0,0,0,0,              // 0x16 mov rdx, chunkname (imm@0x18)
+        0x49, 0xB8, 0,0,0,0,0,0,0,0,              // 0x20 mov r8,  source    (imm@0x22)
+        0x49, 0xB9, 0,0,0,0,0,0,0,0,              // 0x2A mov r9,  size      (imm@0x2C)
+        0x48, 0xC7, 0x44, 0x24, 0x20, 0,0,0,0,    // 0x34 mov [rsp+0x20], 0  (debug=0)
+        0x48, 0xB8, 0,0,0,0,0,0,0,0,              // 0x3D mov rax, luau_load (imm@0x3F)
+        0xFF, 0xD0,                               // 0x47 call rax
+        0x49, 0x89, 0x45, 0x00,                   // 0x49 mov [r13+0], rax   (luau_load result)
+        0x48, 0x89, 0xD9,                         // 0x4D mov rcx, rbx  (L)
+        0x33, 0xD2,                               // 0x50 xor edx, edx  (nargs=0)
+        0x41, 0xB8, 0x01,0,0,0,                   // 0x52 mov r8d, 1    (nresults=1)
+        0x45, 0x33, 0xC9,                         // 0x58 xor r9d, r9d  (errfunc=0)
+        0x48, 0xB8, 0,0,0,0,0,0,0,0,              // 0x5B mov rax, lua_pcall (imm@0x5D)
+        0xFF, 0xD0,                               // 0x65 call rax
+        0x49, 0x89, 0x45, 0x08,                   // 0x67 mov [r13+8], rax   (lua_pcall result)
+        0x48, 0x83, 0xC4, 0x30,                   // 0x6B add rsp, 0x30
+        0x41, 0x5D,                               // 0x6F pop r13
+        0x5B,                                     // 0x71 pop rbx
+        0x33, 0xC0,                               // 0x72 xor eax, eax
+        0xC3                                      // 0x74 ret
     };
 
-    // Patch offsets (verify by counting bytes manually):
-    // offset  4: r8  = pScript
-    // offset 14: r9  = scriptLen
-    // offset 24: rax = pChunkName (first use)
-    // offset 47: rax = luau_load
-    // offset 69: rax = lua_pcall
+    if (sc.size() != 0x75) {
+        OutputDebugStringA("[CorescriptExecutor] LuauVM: shellcode size mismatch!\n");
+        return false;
+    }
 
-    // Allocate remote block
-    SIZE_T scSize   = sc.size();
-    SIZE_T total    = scSize + scriptLen + 1 + chunkNameLen;
+    // --- Alokasi remote memory -----------------------------------------
+    SIZE_T scSize = sc.size();
+    const size_t RESULTS_SLOT_SIZE = 16;
+    SIZE_T total = scSize + scriptLen + 1 + chunkNameLen + RESULTS_SLOT_SIZE;
 
     LPVOID pRemote = VirtualAllocEx(g_hRobloxProcess, NULL, total,
                                     MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
@@ -218,60 +182,61 @@ static bool ExecuteViaLuauVM(const std::string& script) {
 
     BYTE* pScriptRemote    = static_cast<BYTE*>(pRemote) + scSize;
     BYTE* pChunkNameRemote = pScriptRemote + scriptLen + 1;
+    BYTE* pResultsRemote   = pChunkNameRemote + chunkNameLen;
 
-    // Write script and chunk name
     WriteProcessMemory(g_hRobloxProcess, pScriptRemote, script.c_str(), scriptLen + 1, NULL);
     WriteProcessMemory(g_hRobloxProcess, pChunkNameRemote, chunkName, chunkNameLen, NULL);
 
-    // Patch addresses into shellcode
-    auto patch64 = [&](size_t offset, uint64_t value) {
-        memcpy(sc.data() + offset, &value, 8);
-    };
-    auto patch32 = [&](size_t offset, uint32_t value) {
-        memcpy(sc.data() + offset, &value, 4);
-    };
+    auto patch64 = [&](size_t off, uint64_t value) { memcpy(sc.data() + off, &value, 8); };
+    patch64(0x07, reinterpret_cast<uint64_t>(pResultsRemote));    // r13 = results
+    patch64(0x18, reinterpret_cast<uint64_t>(pChunkNameRemote));  // rdx = chunkname
+    patch64(0x22, reinterpret_cast<uint64_t>(pScriptRemote));     // r8  = source
+    patch64(0x2C, static_cast<uint64_t>(scriptLen));              // r9  = size
+    patch64(0x3F, reinterpret_cast<uint64_t>(g_functions.luau_load)); // luau_load
+    patch64(0x5D, reinterpret_cast<uint64_t>(g_functions.lua_pcall)); // lua_pcall
 
-    patch64(6,  reinterpret_cast<uint64_t>(pScriptRemote));     // r8 = script
-    patch64(16, static_cast<uint64_t>(scriptLen));              // r9 = len
-    patch64(26, reinterpret_cast<uint64_t>(pChunkNameRemote));  // rax = chunkname
-    patch64(49, reinterpret_cast<uint64_t>(g_functions.luau_load));
-    patch64(71, reinterpret_cast<uint64_t>(g_functions.lua_pcall));
-
-    // Write shellcode
     WriteProcessMemory(g_hRobloxProcess, pRemote, sc.data(), scSize, NULL);
 
-    // lua_State* — pass from scanner if found, otherwise NULL (Roblox might crash)
-    LPVOID lpParam = g_functions.lua_State_ptr;  // may be nullptr
-
-    DWORD  threadId = 0;
-    HANDLE hThread  = CreateRemoteThread(g_hRobloxProcess, NULL, 0,
+    DWORD threadId = 0;
+    HANDLE hThread = CreateRemoteThread(g_hRobloxProcess, NULL, 0,
         reinterpret_cast<LPTHREAD_START_ROUTINE>(pRemote),
-        lpParam, 0, &threadId);
+        (LPVOID)(uintptr_t)luaState, 0, &threadId);
 
     if (!hThread) {
-        char dbg[128];
-        snprintf(dbg, sizeof(dbg),
-            "[CorescriptExecutor] LuauVM: CreateRemoteThread failed! Error: %lu",
-            GetLastError());
+        snprintf(dbg, sizeof(dbg), "[CorescriptExecutor] LuauVM: CreateRemoteThread failed! Error: %lu", GetLastError());
         OutputDebugStringA(dbg);
         VirtualFreeEx(g_hRobloxProcess, pRemote, 0, MEM_RELEASE);
         return false;
     }
 
     WaitForSingleObject(hThread, 5000);
+
+    // --- Baca status Luau yang sebenarnya --------------------------------
+    struct LuauResults { uint64_t load_ret; uint64_t pcall_ret; };
+    LuauResults results = {};
+    ReadProcessMemory(g_hRobloxProcess, pResultsRemote, &results, sizeof(results), NULL);
+
     DWORD exitCode = 0;
     GetExitCodeThread(hThread, &exitCode);
     CloseHandle(hThread);
-
-    // Free remote memory after execution
     VirtualFreeEx(g_hRobloxProcess, pRemote, 0, MEM_RELEASE);
 
-    char dbg[128];
+    // LUA_OK = 0. pcall_ret != 0 => ada error. load_ret == 0 => gagal kompilasi/load.
     snprintf(dbg, sizeof(dbg),
-        "[CorescriptExecutor] LuauVM: thread exit code = %lu", exitCode);
+        "[CorescriptExecutor] LuauVM: load_ret=0x%llX pcall_ret=0x%llX (%s)\n",
+        results.load_ret, results.pcall_ret,
+        (results.pcall_ret == 0) ? "LUA_OK - script berjalan" : "LUA_ERR - script gagal");
     OutputDebugStringA(dbg);
 
-    return true;
+    // Tulis status ke file agar mudah dicek tanpa DebugView.
+    FILE* f = nullptr;
+    if (fopen_s(&f, "C:\\hermes_exec_status.txt", "w") == 0 && f) {
+        fprintf(f, "load_ret=0x%llX\npcall_ret=0x%llX\nlua_state=0x%llX\n",
+                results.load_ret, results.pcall_ret, luaState);
+        fclose(f);
+    }
+
+    return (results.pcall_ret == 0);
 }
 
 // ==============================================
@@ -343,20 +308,13 @@ bool ExecuteCorescript(const std::string& script) {
         return false;
     }
 
-    // Method 1: Full Luau VM call (uses scanner-found function pointers)
+    // Satu-satunya jalur eksekusi nyata: panggil Luau VM di Roblox.
     OutputDebugStringA("[CorescriptExecutor] Trying ExecuteViaLuauVM...");
-    if (ExecuteViaLuauVM(script)) {
-        OutputDebugStringA("[CorescriptExecutor] LuauVM: SUCCESS.");
-        return true;
+    bool ok = ExecuteViaLuauVM(script);
+    if (ok) {
+        OutputDebugStringA("[CorescriptExecutor] LuauVM: SUCCESS (LUA_OK).");
+    } else {
+        OutputDebugStringA("[CorescriptExecutor] LuauVM: FAILED (script tidak berjalan).");
     }
-
-    // Method 2: Shellcode stub (proves remote thread works, no actual Lua execution)
-    OutputDebugStringA("[CorescriptExecutor] Trying Shellcode fallback...");
-    if (ExecuteViaShellcode(script)) {
-        OutputDebugStringA("[CorescriptExecutor] Shellcode: SUCCESS (stub only).");
-        return true;
-    }
-
-    OutputDebugStringA("[CorescriptExecutor] All methods failed.");
-    return false;
+    return ok;
 }
